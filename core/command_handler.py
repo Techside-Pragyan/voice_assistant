@@ -45,6 +45,10 @@ class CommandHandler:
             self._morning_routine()
         elif intent == 'joke':
             self._tell_joke()
+        elif intent == 'screenshot':
+            self._take_screenshot()
+        elif intent == 'stocks':
+            self._get_stock_price(params[0])
         elif intent == 'exit':
             tts.speak("Goodbye! Have a great day.")
             return False
@@ -185,6 +189,26 @@ class CommandHandler:
         ]
         import random
         tts.speak(random.choice(jokes))
+
+    def _take_screenshot(self):
+        try:
+            import pyautogui
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"screenshot_{timestamp}.png"
+            pyautogui.screenshot(filename)
+            tts.speak(f"Screenshot taken and saved as {filename}")
+        except Exception as e:
+            tts.speak(f"Failed to take screenshot: {e}")
+
+    def _get_stock_price(self, ticker):
+        try:
+            import yfinance as yf
+            tts.speak(f"Fetching data for {ticker}")
+            stock = yf.Ticker(ticker.upper())
+            price = stock.history(period='1d')['Close'].iloc[-1]
+            tts.speak(f"The current closing price of {ticker.upper()} is {price:.2f} dollars.")
+        except Exception:
+            tts.speak(f"I couldn't find the stock price for {ticker}. Please make sure you used the correct ticker symbol.")
 
     def _handle_unknown(self):
         tts.speak("I'm sorry, I don't know how to do that yet. I'm still learning!")
