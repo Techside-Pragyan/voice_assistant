@@ -61,20 +61,42 @@ class VoiceAssistantGUI:
         )
         self.status_label.pack(pady=10)
 
-        # Transcript Area with scrolling capability
-        self.transcript_frame = tk.Frame(self.root, bg="#181825", padx=15, pady=10)
-        self.transcript_frame.pack(fill="both", expand=True, padx=20, pady=20)
-        
-        self.transcript_label = tk.Label(
-            self.transcript_frame, 
-            text="Greeting...", 
-            font=("Inter", 10),
-            bg="#181825", 
-            fg="#cdd6f4",
-            wraplength=320,
-            justify="left"
-        )
         self.transcript_label.pack(anchor="w")
+
+        # Fallback Text Input (at the bottom)
+        self.input_frame = tk.Frame(self.root, bg="#0f0f1a")
+        self.input_frame.pack(side="bottom", fill="x", padx=20, pady=(0, 20))
+        
+        self.user_input = tk.Entry(
+            self.input_frame, 
+            bg="#181825", 
+            fg="#cdd6f4", 
+            insertbackground="white",
+            borderwidth=0,
+            font=("Inter", 10)
+        )
+        self.user_input.pack(side="left", fill="x", expand=True, ipady=8, padx=(0, 10))
+        self.user_input.bind("<Return>", lambda e: self.send_text_command())
+
+        self.send_btn = tk.Button(
+            self.input_frame,
+            text="➤",
+            command=self.send_text_command,
+            bg="#5865f2",
+            fg="white",
+            borderwidth=0,
+            padx=10
+        )
+        self.send_btn.pack(side="right")
+        
+        # Queue for passing text commands to the logic thread
+        self.command_queue = []
+
+    def send_text_command(self):
+        text = self.user_input.get()
+        if text:
+            self.command_queue.append(text)
+            self.user_input.delete(0, tk.END)
 
     def update_status(self, text, color="#89b4fa"):
         self.status_label.config(text=text.upper(), fg=color)
@@ -98,28 +120,40 @@ class VoiceAssistantGUI:
         self.root.after(50, self.animate_pulse)
 
     def run_assistant_logic(self):
-        self.update_status("Offline", "#f38ba8")
+        self.update_status("Standby", "#5865f2")
         tts.speak(f"System online.")
         
         active = False
         
+        import time
         while True:
             try:
+                # Check for manual text commands from the GUI
+                fallback_text = None
+                if self.command_queue:
+                    fallback_text = self.command_queue.pop(0)
+
                 if not active:
                     self.update_status("Standby", "#5865f2")
-                    query = recognizer.listen()
+                    query = recognizer.listen(fallback_text=fallback_text)
                     
-                    if WAKE_WORD in query:
+                    if query and WAKE_WORD in query:
                         active = True
                         self.update_status("Listening...", "#a6e3a1")
                         tts.speak("How can I help?")
+                    
+                    if not query:
+                        time.sleep(0.1) # Prevent high CPU when idle
                     continue
 
                 self.update_status("Listening...", "#a6e3a1")
-                query = recognizer.listen()
+                query = recognizer.listen(fallback_text=fallback_text)
                 
                 if not query:
-                    active = False
+                    if recognizer.microphone_missing:
+                        time.sleep(0.1) # Wait for text input
+                    else:
+                        active = False # Timeout on voice
                     continue
 
                 self.update_transcript(f"User: {query}")
@@ -129,11 +163,12 @@ class VoiceAssistantGUI:
                 should_continue = command_handler.execute(intent, params)
                 
                 if not should_continue:
-                    self.root.quit()
+                    self.root.after(1000, self.root.quit)
                     break
                     
             except Exception as e:
                 print(f"Logic Error: {e}")
+                time.sleep(1)
 
 if __name__ == "__main__":
     root = tk.Tk()

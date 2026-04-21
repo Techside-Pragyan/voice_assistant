@@ -14,14 +14,14 @@ class SpeechRecognizer:
             print("Falling back to text-based input.")
             self.microphone_missing = True
 
-    def listen(self):
+    def listen(self, fallback_text=None):
         """
         Listens for audio input and returns the recognized text.
-        Falls back to text input if microphone is unavailable.
         """
         if self.microphone_missing:
-            query = input("\n[System: No Mic] Type your command: ")
-            return query.lower()
+            if fallback_text:
+                return fallback_text.lower()
+            return "" # Return empty so it doesn't block the GUI thread
 
         with self.microphone as source:
             print("\nListening...")
