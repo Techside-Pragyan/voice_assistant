@@ -171,7 +171,10 @@ class VoiceAssistantGUI:
             self.voice_frame_counter = 0
 
         # 2. Glow Ring Logic
-        if self.status_label.cget("text") == "RECORDING..." or tts.is_speaking:
+        current_text = self.status_label.cget("text")
+        is_active = current_text in ["LISTENING...", "RECORDING...", "SPEAKING...", "THINKING..."]
+        
+        if is_active:
             if self.pulse_growing:
                 self.pulse_size += 5
                 if self.pulse_size > 25: self.pulse_growing = False
@@ -179,8 +182,11 @@ class VoiceAssistantGUI:
                 self.pulse_size -= 5
                 if self.pulse_size < 0: self.pulse_growing = True
             
-            # Bright glow when active or speaking
-            glow_color = "#a6e3a1" if tts.is_speaking else "#bb9af7"
+            # Glow Color based on state
+            glow_color = "#bb9af7" # Default Active
+            if "SPEAKING" in current_text: glow_color = "#a6e3a1"
+            if "THINKING" in current_text: glow_color = "#fab387"
+            
             self.canvas.itemconfig(self.glow_ring, width=5, outline=glow_color)
             self.canvas.coords(self.glow_ring, 25-self.pulse_size, 10-self.pulse_size, 275+self.pulse_size, 260+self.pulse_size)
         else:
