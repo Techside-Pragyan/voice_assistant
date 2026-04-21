@@ -228,19 +228,18 @@ class CommandHandler:
         tts.speak(f"Finding {location} on Google Maps")
         webbrowser.open(f"https://www.google.com/maps/search/{location}")
 
-    def _open_application(self, app_name):
-        app_name = app_name.lower()
-        tts.speak(f"Opening {app_name}")
+    def _open_application(self, query):
+        query = query.lower()
         
         # Comprehensive mapping
         apps = {
             "chrome": ["chrome.exe", "google-chrome", "https://google.com"],
-            "google chrome": ["chrome.exe", "https://google.com"],
+            "google": ["chrome.exe", "https://google.com"],
             "spotify": ["spotify.exe", "https://open.spotify.com"],
             "whatsapp": ["whatsapp:", "https://web.whatsapp.com"],
-            "vs code": ["code", "https://vscode.dev"],
-            "vscode": ["code", "https://vscode.dev"],
-            "visual studio code": ["code"],
+            "code": ["code", "https://vscode.dev"],
+            "vs": ["code"],
+            "visual": ["code"],
             "github": ["https://github.com"],
             "youtube": ["https://youtube.com"],
             "notion": ["notion:", "https://notion.so"],
@@ -248,12 +247,20 @@ class CommandHandler:
             "notepad": ["notepad.exe"],
         }
         
-        if app_name in apps:
-            targets = apps[app_name]
+        app_to_open = None
+        for key in apps:
+            if key in query:
+                app_to_open = key
+                break
+        
+        if app_to_open:
+            tts.speak(f"Sure, I'm opening {app_to_open} for you right now.")
+            targets = apps[app_to_open]
             success = False
             for target in targets:
                 try:
                     if target.startswith("http"):
+                        import webbrowser
                         webbrowser.open(target)
                         success = True
                         break
@@ -266,9 +273,12 @@ class CommandHandler:
                     continue
             
             if not success:
-                webbrowser.open(f"https://www.google.com/search?q=open+{app_name}")
+                import webbrowser
+                webbrowser.open(f"https://www.google.com/search?q=open+{query}")
         else:
-            webbrowser.open(f"https://www.google.com/search?q=open+{app_name}")
+            tts.speak(f"I'll look for {query} online.")
+            import webbrowser
+            webbrowser.open(f"https://www.google.com/search?q=open+{query}")
 
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")
