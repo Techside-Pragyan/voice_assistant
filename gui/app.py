@@ -249,9 +249,7 @@ class VoiceAssistantGUI:
 
                     self.update_status("Thinking...", "#fab387")
                     intent, params = intent_engine.get_intent(query)
-                    
-                    # For a 'natural' talk, unknown intents go to OpenAI AI
-                    should_continue = command_handler.execute(intent, params)
+                    should_continue = command_handler.execute(intent, params, original_query=query)
                     
                     if not should_continue:
                         self.root.after(1000, self.root.quit)
