@@ -139,6 +139,7 @@ class VoiceAssistantGUI:
     def update_transcript(self, text):
         self.transcript_label.config(text=text)
 
+    def animate_pulse(self):
         # 1. Floating & Breathing Logic
         import math
         import time
