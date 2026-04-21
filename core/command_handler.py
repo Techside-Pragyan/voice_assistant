@@ -248,32 +248,22 @@ class CommandHandler:
                 break
         
         if target_app:
-            tts.speak(f"Consider it done. I'm opening {target_app} for you now.")
+            tts.speak(f"Processing. I'm forcing {target_app} to open.")
             try:
-                # Guaranteed method for browser
-                if "chrome" in target_app:
-                    import webbrowser
-                    webbrowser.open("https://google.com")
-                    return
+                import subprocess
+                # This is the most powerful 'force-launch' command in Windows
+                subprocess.Popen(f"start {target_app}", shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
                 
-                if "youtube" in target_app:
+                # If it's a browser request, double-trigger it
+                if "chrome" in target_app or "google" in target_app:
                     import webbrowser
-                    webbrowser.open("https://youtube.com")
-                    return
-
-                if "spotify" in target_app:
-                    import os
-                    os.system("start spotify") # Standard windows command
-                    return
-
-                # Generic start command for everything else
-                import os
-                os.system(f"start {target_app}")
-            except Exception:
+                    webbrowser.open("https://www.google.com")
+            except Exception as e:
+                print(f"Force Launch Error: {e}")
                 import webbrowser
                 webbrowser.open(f"https://www.google.com/search?q={target_app}")
         else:
-            tts.speak(f"I couldn't find {query} on your desktop, so I'll open it in your browser instead.")
+            tts.speak(f"Local app not found. Opening {query} in your web browser.")
             import webbrowser
             webbrowser.open(f"https://www.google.com/search?q={query}")
 
