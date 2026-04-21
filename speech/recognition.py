@@ -20,9 +20,9 @@ class SpeechRecognizer:
             print(f"Warning: No input device found: {e}")
             self.microphone_missing = True
 
-    def _record_audio(self, max_duration=10, silence_threshold=400, silence_limit=2.5):
+    def _record_audio(self, max_duration=8, silence_threshold=400, silence_limit=1.0):
         """
-        Records audio and stops automatically when silence is detected.
+        Records audio and stops automatically when silence is detected (High Performance).
         """
         print("Listening...")
         chunk_size = 1024
