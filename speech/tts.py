@@ -5,10 +5,13 @@ class TTSManager:
     def __init__(self):
         self.engine = pyttsx3.init()
         self._setup_voice()
+        self.gui_callback = None
+
+    def set_gui_callback(self, callback):
+        self.gui_callback = callback
 
     def _setup_voice(self):
         voices = self.engine.getProperty('voices')
-        # Selecting a female voice if available, otherwise default
         for voice in voices:
             if "female" in voice.name.lower() or "zira" in voice.name.lower():
                 self.engine.setProperty('voice', voice.id)
@@ -19,6 +22,8 @@ class TTSManager:
 
     def speak(self, text):
         print(f"Assistant: {text}")
+        if self.gui_callback:
+            self.gui_callback(f"AURA: {text}")
         self.engine.say(text)
         self.engine.runAndWait()
 

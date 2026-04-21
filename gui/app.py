@@ -19,6 +19,9 @@ class VoiceAssistantGUI:
         self.pulse_size = 0
         self.pulse_growing = True
         
+        # Connect TTS to GUI for visual feedback
+        tts.set_gui_callback(self.update_transcript)
+        
         # Start assistant thread
         self.assistant_thread = threading.Thread(target=self.run_assistant_logic, daemon=True)
         self.assistant_thread.start()
