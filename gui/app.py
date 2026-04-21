@@ -165,27 +165,34 @@ class VoiceAssistantGUI:
 
                 self.update_transcript(f"User: {query}")
 
-                # Check for wake word
-                wake_word_detected = "aura" in query.lower()
+                # Check for wake word (Broadening for common mishearings)
+                wake_words = ["aura", "ora", "aiora", "hiora", "ahura"]
+                wake_word_detected = any(word in query.lower() for word in wake_words)
 
                 if wake_word_detected:
                     active = True
                     last_active_time = time.time()
                     
-                    # Clean the query (remove the wake word to get the actual command)
-                    clean_query = query.lower().replace("aura", "").replace("hey", "").strip()
+                    # Try to remove the wake word from the query
+                    clean_query = query.lower()
+                    for word in wake_words:
+                        clean_query = clean_query.replace(word, "")
+                    clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
                     
                     if not clean_query:
-                        # Only the wake word was said
                         tts.speak("Yes? I'm listening.")
                         continue
                     else:
-                        query = clean_query # Process the rest as a command
+                        query = clean_query
 
                 if active:
+                    # Stay awake for 30 seconds
                     last_active_time = time.time()
-                    self.update_status("Thinking...", "#fab387")
                     
+                    if not query:
+                        continue
+
+                    self.update_status("Thinking...", "#fab387")
                     intent, params = intent_engine.get_intent(query)
                     should_continue = command_handler.execute(intent, params)
                     
