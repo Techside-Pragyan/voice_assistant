@@ -50,27 +50,27 @@ class VoiceAssistantGUI:
         self.canvas = tk.Canvas(self.root, width=300, height=300, bg="#0f0f1a", highlightthickness=0)
         self.canvas.pack(pady=10)
         
-        # Load Anime Avatar (Frames for Talking)
+        # Load 3D Live Avatar (Snapchat Style Frames)
         try:
             from PIL import Image, ImageTk
             import os
             # Paths
-            path_closed = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_girl_closed_mouth_1776786192765.png"
-            path_open = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_girl_open_mouth_1776786214098.png"
+            path_closed = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\3d_avatar_closed_mouth_1776787113809.png"
+            path_open = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\3d_avatar_open_mouth_1776787155269.png"
             
             self.frames = []
             for p in [path_closed, path_open]:
-                img = Image.open(p).resize((280, 280), Image.LANCZOS)
+                img = Image.open(p).resize((300, 300), Image.LANCZOS)
                 self.frames.append(ImageTk.PhotoImage(img))
             
-            self.avatar_display = self.canvas.create_image(150, 140, image=self.frames[0])
+            self.avatar_display = self.canvas.create_image(150, 150, image=self.frames[0])
             self.voice_frame_counter = 0
         except Exception as e:
             print(f"Image load error: {e}")
-            self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#bb9af7", outline="")
+            self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#FFFC00", outline="")
         
-        # Glow Effect Ring (Vibrant Purple/Blue)
-        self.glow_ring = self.canvas.create_oval(15, 5, 285, 275, outline="#bb9af7", width=2)
+        # Glow Effect Ring (Snapchat Gold)
+        self.glow_ring = self.canvas.create_oval(10, 5, 290, 290, outline="#FFFC00", width=3)
         
         # Status Text with better font
         self.status_label = tk.Label(
