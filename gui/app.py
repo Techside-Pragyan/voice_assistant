@@ -221,38 +221,39 @@ class VoiceAssistantGUI:
                 query = recognizer.listen(fallback_text=fallback_text)
                 
                 if not query:
-                    # Naturally go back to standby after 60 seconds of silence
-                    if active and (time.time() - last_active_time > 60):
+                    # Naturally go back to standby after 30 seconds of silence
+                    if active and (time.time() - last_active_time > 30):
                         active = False
                         self.update_status("Standby", "#5865f2")
-                        tts.speak("I'll be here if you need me. Just call my name.")
                     time.sleep(0.1)
                     continue
 
                 self.update_transcript(f"User: {query}")
 
-                # Check for wake word ONLY if we aren't already in a conversation
+                # DIRECT TRIGGER: If user says 'open', 'start', 'play', 'what', or 'how', act immediately!
+                direct_keywords = ["open", "start", "launch", "play", "what", "how", "tell", "show", "search"]
+                is_direct = any(word in query.lower() for word in direct_keywords)
+                
                 wake_words = ["aura", "ora", "aiora", "hiora", "ahura"]
                 wake_word_detected = any(word in query.lower() for word in wake_words)
 
-                if wake_word_detected or active:
+                if wake_word_detected or is_direct or active:
                     active = True
                     last_active_time = time.time()
                     
-                    # If it was a one-shot (Wake word + Command)
-                    if wake_word_detected:
-                        clean_query = query.lower()
-                        for word in wake_words:
-                            clean_query = clean_query.replace(word, "")
-                        clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
-                        if clean_query: query = clean_query
-                        elif not active: # If just the name was said
-                            tts.speak("I'm listening! What's on your mind?")
-                            continue
+                    # Clean up the query
+                    clean_query = query.lower()
+                    for word in wake_words:
+                        clean_query = clean_query.replace(word, "")
+                    clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
+                    
+                    if not clean_query and wake_word_detected:
+                        tts.speak("I'm listening! What can I do for you?")
+                        continue
 
                     self.update_status("Thinking...", "#fab387")
-                    intent, params = intent_engine.get_intent(query)
-                    should_continue = command_handler.execute(intent, params, original_query=query)
+                    intent, params = intent_engine.get_intent(clean_query if clean_query else query)
+                    should_continue = command_handler.execute(intent, params, original_query=clean_query if clean_query else query)
                     
                     if not should_continue:
                         self.root.after(1000, self.root.quit)
