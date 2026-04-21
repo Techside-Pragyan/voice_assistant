@@ -6,6 +6,7 @@ class TTSManager:
         self.engine = pyttsx3.init()
         self._setup_voice()
         self.gui_callback = None
+        self.is_speaking = False
 
     def set_gui_callback(self, callback):
         self.gui_callback = callback

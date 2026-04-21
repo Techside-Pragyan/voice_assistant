@@ -172,7 +172,7 @@ class VoiceAssistantGUI:
 
     def run_assistant_logic(self):
         self.update_status("Standby", "#5865f2")
-        tts.speak(f"AURA system is online.")
+        tts.speak(f"Hello! I'm AURA. I'm so happy to talk with you.")
         
         active = False
         last_active_time = 0
@@ -185,50 +185,46 @@ class VoiceAssistantGUI:
                     fallback_text = self.command_queue.pop(0)
 
                 # Status updates
-                current_status = "Standby" if not active else "Recording..."
-                self.update_status(current_status, "#5865f2" if not active else "#f38ba8")
+                # If we are active, we use a warmer 'listening' color
+                current_status = "Standby" if not active else "Listening..."
+                self.update_status(current_status, "#5865f2" if not active else "#bb9af7")
 
                 query = recognizer.listen(fallback_text=fallback_text)
                 
                 if not query:
-                    # If we have been active but no one spoke for 10 seconds, go to standby
-                    if active and (time.time() - last_active_time > 10):
+                    # Naturally go back to standby after 60 seconds of silence
+                    if active and (time.time() - last_active_time > 60):
                         active = False
                         self.update_status("Standby", "#5865f2")
+                        tts.speak("I'll be here if you need me. Just call my name.")
                     time.sleep(0.1)
                     continue
 
                 self.update_transcript(f"User: {query}")
 
-                # Check for wake word (Broadening for common mishearings)
+                # Check for wake word ONLY if we aren't already in a conversation
                 wake_words = ["aura", "ora", "aiora", "hiora", "ahura"]
                 wake_word_detected = any(word in query.lower() for word in wake_words)
 
-                if wake_word_detected:
+                if wake_word_detected or active:
                     active = True
                     last_active_time = time.time()
                     
-                    # Try to remove the wake word from the query
-                    clean_query = query.lower()
-                    for word in wake_words:
-                        clean_query = clean_query.replace(word, "")
-                    clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
-                    
-                    if not clean_query:
-                        tts.speak("Yes? I'm listening.")
-                        continue
-                    else:
-                        query = clean_query
-
-                if active:
-                    # Stay awake for 30 seconds
-                    last_active_time = time.time()
-                    
-                    if not query:
-                        continue
+                    # If it was a one-shot (Wake word + Command)
+                    if wake_word_detected:
+                        clean_query = query.lower()
+                        for word in wake_words:
+                            clean_query = clean_query.replace(word, "")
+                        clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
+                        if clean_query: query = clean_query
+                        elif not active: # If just the name was said
+                            tts.speak("I'm listening! What's on your mind?")
+                            continue
 
                     self.update_status("Thinking...", "#fab387")
                     intent, params = intent_engine.get_intent(query)
+                    
+                    # For a 'natural' talk, unknown intents go to OpenAI AI
                     should_continue = command_handler.execute(intent, params)
                     
                     if not should_continue:
