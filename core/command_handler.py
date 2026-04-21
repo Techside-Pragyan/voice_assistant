@@ -229,54 +229,45 @@ class CommandHandler:
     def _open_application(self, query):
         query = query.lower()
         
-        # Comprehensive mapping
+        # Mapping to actual Windows execution targets
         apps = {
-            "chrome": ["chrome.exe", "google-chrome", "https://google.com"],
-            "google": ["chrome.exe", "https://google.com"],
-            "spotify": ["spotify.exe", "https://open.spotify.com"],
-            "whatsapp": ["whatsapp:", "https://web.whatsapp.com"],
-            "code": ["code", "https://vscode.dev"],
-            "vs": ["code"],
-            "visual": ["code"],
-            "github": ["https://github.com"],
-            "youtube": ["https://youtube.com"],
-            "notion": ["notion:", "https://notion.so"],
-            "calculator": ["calc.exe"],
-            "notepad": ["notepad.exe"],
+            "chrome": ["chrome", "google chrome"],
+            "spotify": ["spotify"],
+            "whatsapp": ["whatsapp"],
+            "code": ["code"],
+            "vs code": ["code"],
+            "notion": ["notion"],
+            "calculator": ["calc"],
+            "notepad": ["notepad"],
         }
         
-        app_to_open = None
+        target_app = None
         for key in apps:
             if key in query:
-                app_to_open = key
+                target_app = key
                 break
         
-        if app_to_open:
-            tts.speak(f"Sure, I'm opening {app_to_open} for you right now.")
-            targets = apps[app_to_open]
-            success = False
-            for target in targets:
-                try:
-                    if target.startswith("http"):
-                        import webbrowser
-                        webbrowser.open(target)
-                        success = True
-                        break
-                    else:
-                        import subprocess
-                        subprocess.Popen(f"start {target}", shell=True)
-                        success = True
-                        break
-                except Exception:
-                    continue
-            
-            if not success:
+        if target_app:
+            tts.speak(f"Right away. Launching {target_app} for you.")
+            try:
+                import os
+                # Using 'start' as a shell command is most reliable for Windows Shortcuts/Apps
+                os.system(f"start {target_app}")
+            except Exception as e:
+                print(f"App Launch Error: {e}")
                 import webbrowser
-                webbrowser.open(f"https://www.google.com/search?q=open+{query}")
+                # Fallback to web version
+                web_targets = {
+                    "spotify": "https://open.spotify.com",
+                    "chrome": "https://google.com",
+                    "whatsapp": "https://web.whatsapp.com",
+                }
+                if target_app in web_targets:
+                    webbrowser.open(web_targets[target_app])
         else:
-            tts.speak(f"I'll look for {query} online.")
+            tts.speak(f"I couldn't find a local app for {query}, so I'll search for it online.")
             import webbrowser
-            webbrowser.open(f"https://www.google.com/search?q=open+{query}")
+            webbrowser.open(f"https://www.google.com/search?q={query}")
 
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")
