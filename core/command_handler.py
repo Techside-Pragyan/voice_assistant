@@ -1,10 +1,7 @@
-import webbrowser
-import os
-import datetime
-import wikipediaapi
-import requests
 from speech.tts import tts
 from config.settings import OPENWEATHER_API_KEY
+from utils.memory import memory
+from integrations.ai_consultant import ai_consultant
 
 class CommandHandler:
     def __init__(self):
@@ -33,11 +30,16 @@ class CommandHandler:
             self._greet()
         elif intent == 'news':
             self._get_news()
+        elif intent == 'change_name':
+            self._change_user_name(params[0])
         elif intent == 'exit':
             tts.speak("Goodbye! Have a great day.")
             return False
         else:
-            self._handle_unknown()
+            # If intent is unknown, ask the AI brain (OpenAI)
+            query = params[0] if params else "Hello"
+            self._ask_ai(query)
+            
         return True
 
     def _tell_time(self):
@@ -63,7 +65,6 @@ class CommandHandler:
 
     def _open_app(self, app_name):
         tts.speak(f"Opening {app_name}")
-        # Common apps mapping
         apps = {
             "chrome": "start chrome",
             "notepad": "notepad.exe",
@@ -81,9 +82,7 @@ class CommandHandler:
             tts.speak("Weather API key is not set. Please update the .env file.")
             return
 
-        # Simple weather check for a default city (or ask user)
-        # For demo, using a fixed city or placeholder
-        city = "London" # This could be dynamic
+        city = "London"
         url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={OPENWEATHER_API_KEY}&units=metric"
         try:
             response = requests.get(url).json()
@@ -99,20 +98,26 @@ class CommandHandler:
 
     def _calculate(self, expression):
         try:
-            # Note: eval is dangerous, but for a simple local assistant on trusted input it can be okay.
-            # In a production app, use a safer math parser.
             result = eval(expression)
             tts.speak(f"The result is {result}")
         except Exception:
             tts.speak("I couldn't perform that calculation.")
 
     def _greet(self):
-        tts.speak("Hello! I am your AI assistant. How can I help you today?")
+        user_name = memory.get("user_name", "User")
+        tts.speak(f"Hello {user_name}! I am your AI assistant. How can I help you today?")
 
     def _get_news(self):
         tts.speak("Fetching the latest headlines for you.")
-        # Placeholder for news API integration
         tts.speak("Top story: AI technology continues to advance rapidly!")
+
+    def _change_user_name(self, new_name):
+        memory.set("user_name", new_name)
+        tts.speak(f"Alright, I'll call you {new_name} from now on.")
+
+    def _ask_ai(self, query):
+        response = ai_consultant.ask(query)
+        tts.speak(response)
 
     def _handle_unknown(self):
         tts.speak("I'm sorry, I don't know how to do that yet. I'm still learning!")
