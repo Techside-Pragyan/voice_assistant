@@ -13,9 +13,9 @@ class AIConsultant:
         ]
 
     def ask(self, question):
-        if not self.client:
-            return "I'm sorry, my AI brain (OpenAI API key) is not connected."
-
+        if not OPENAI_API_KEY or "your_" in OPENAI_API_KEY:
+            return "I'm sorry, my AI brain is not connected yet. Please add your OpenAI API key to the .env file. However, I can still open apps for you!"
+            
         try:
             self.conversation_history.append({"role": "user", "content": question})
             
