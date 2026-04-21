@@ -46,18 +46,34 @@ class VoiceAssistantGUI:
         )
         self.subtitle.pack()
 
-        # Voice Visualization Area
-        self.canvas = tk.Canvas(self.root, width=300, height=250, bg="#0f0f1a", highlightthickness=0)
+        # Voice Visualization & Avatar Area
+        self.canvas = tk.Canvas(self.root, width=300, height=300, bg="#0f0f1a", highlightthickness=0)
         self.canvas.pack(pady=10)
         
-        # Multiple rings for glowing effect
-        self.outer_ring = self.canvas.create_oval(75, 50, 225, 200, outline="#5865f2", width=1)
-        self.inner_ring = self.canvas.create_oval(100, 75, 200, 175, fill="#5865f2", outline="")
+        # Load Anime Avatar
+        try:
+            from PIL import Image, ImageTk
+            import os
+            # Image path from previous generation
+            img_path = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_assistant_avatar_1776784785910.png"
+            if os.path.exists(img_path):
+                img = Image.open(img_path)
+                img = img.resize((250, 250), Image.LANCZOS)
+                self.avatar_img = ImageTk.PhotoImage(img)
+                self.avatar_display = self.canvas.create_image(150, 125, image=self.avatar_img)
+            else:
+                self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#5865f2", outline="")
+        except Exception as e:
+            print(f"Image load error: {e}")
+            self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#5865f2", outline="")
+        
+        # Glow Effect Ring
+        self.glow_ring = self.canvas.create_oval(25, 10, 275, 260, outline="#5865f2", width=2)
         
         # Status Text with better font
         self.status_label = tk.Label(
             self.root, 
-            text="VOICE ACTIVE", 
+            text="SYSTEM ONLINE", 
             font=("Inter", 10, "bold"),
             bg="#0f0f1a", 
             fg="#a6e3a1"
