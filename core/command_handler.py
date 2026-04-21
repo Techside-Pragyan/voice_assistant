@@ -234,26 +234,40 @@ class CommandHandler:
         
         # Comprehensive mapping
         apps = {
-            "chrome": "chrome.exe",
-            "google chrome": "chrome.exe",
-            "spotify": "spotify.exe",
-            "whatsapp": "whatsapp:",
-            "vs code": "code",
-            "vscode": "code",
-            "visual studio code": "code",
-            "github": "https://github.com",
-            "youtube": "https://youtube.com",
-            "notion": "notion:",
+            "chrome": ["chrome.exe", "google-chrome", "https://google.com"],
+            "google chrome": ["chrome.exe", "https://google.com"],
+            "spotify": ["spotify.exe", "https://open.spotify.com"],
+            "whatsapp": ["whatsapp:", "https://web.whatsapp.com"],
+            "vs code": ["code", "https://vscode.dev"],
+            "vscode": ["code", "https://vscode.dev"],
+            "visual studio code": ["code"],
+            "github": ["https://github.com"],
+            "youtube": ["https://youtube.com"],
+            "notion": ["notion:", "https://notion.so"],
+            "calculator": ["calc.exe"],
+            "notepad": ["notepad.exe"],
         }
         
         if app_name in apps:
-            if "http" in apps[app_name]:
-                webbrowser.open(apps[app_name])
-            else:
-                import os
-                os.system(f"start {apps[app_name]}")
+            targets = apps[app_name]
+            success = False
+            for target in targets:
+                try:
+                    if target.startswith("http"):
+                        webbrowser.open(target)
+                        success = True
+                        break
+                    else:
+                        import subprocess
+                        subprocess.Popen(f"start {target}", shell=True)
+                        success = True
+                        break
+                except Exception:
+                    continue
+            
+            if not success:
+                webbrowser.open(f"https://www.google.com/search?q=open+{app_name}")
         else:
-            # Try searching on google if app not found
             webbrowser.open(f"https://www.google.com/search?q=open+{app_name}")
 
     def _chrome_search(self, query):
