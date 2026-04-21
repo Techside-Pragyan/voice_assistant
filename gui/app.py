@@ -27,7 +27,7 @@ class VoiceAssistantGUI:
         # Header with Gradient-like label
         self.header = tk.Label(
             self.root, 
-            text="AVA", # Advanced Voice Assistant
+            text="AURA", # Artificial User Responsive Agent
             font=("Inter", 24, "bold"),
             bg="#0f0f1a", 
             fg="#5865f2" # Vibrant Blue

@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Assistant Settings
-ASSISTANT_NAME = "Assistant"
-WAKE_WORD = "hey assistant"
+ASSISTANT_NAME = "AURA"
+WAKE_WORD = "hey aura"
 
 # API Keys (to be set in .env)
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")

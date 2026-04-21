@@ -1,5 +1,4 @@
-import openai
-from config.settings import OPENAI_API_KEY
+from config.settings import OPENAI_API_KEY, ASSISTANT_NAME
 from utils.memory import memory
 
 class AIConsultant:
@@ -9,7 +8,7 @@ class AIConsultant:
             self.client = openai.OpenAI(api_key=OPENAI_API_KEY)
         
         self.conversation_history = [
-            {"role": "system", "content": f"You are a helpful and witty voice assistant named {memory.get('assistant_name', 'Assistant')}. The user's name is {memory.get('user_name', 'User')}."}
+            {"role": "system", "content": f"You are a helpful and witty voice assistant named {ASSISTANT_NAME}. The user's name is {memory.get('user_name', 'User')}."}
         ]
 
     def ask(self, question):
