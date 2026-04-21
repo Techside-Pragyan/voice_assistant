@@ -46,6 +46,10 @@ class VoiceAssistantGUI:
         )
         self.subtitle.pack()
 
+        # Voice Visualization & Avatar Area
+        self.canvas = tk.Canvas(self.root, width=300, height=300, bg="#0f0f1a", highlightthickness=0)
+        self.canvas.pack(pady=10)
+        
         # Load Anime Avatar (Frames for Talking)
         try:
             from PIL import Image, ImageTk
