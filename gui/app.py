@@ -55,20 +55,20 @@ class VoiceAssistantGUI:
             from PIL import Image, ImageTk
             import os
             # Image path from previous generation
-            img_path = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_assistant_avatar_1776784785910.png"
+            img_path = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_girl_assistant_avatar_1776784986376.png"
             if os.path.exists(img_path):
                 img = Image.open(img_path)
                 img = img.resize((250, 250), Image.LANCZOS)
                 self.avatar_img = ImageTk.PhotoImage(img)
                 self.avatar_display = self.canvas.create_image(150, 125, image=self.avatar_img)
             else:
-                self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#5865f2", outline="")
+                self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#bb9af7", outline="")
         except Exception as e:
             print(f"Image load error: {e}")
-            self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#5865f2", outline="")
+            self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#bb9af7", outline="")
         
-        # Glow Effect Ring
-        self.glow_ring = self.canvas.create_oval(25, 10, 275, 260, outline="#5865f2", width=2)
+        # Glow Effect Ring (Vibrant Purple/Blue)
+        self.glow_ring = self.canvas.create_oval(25, 10, 275, 260, outline="#bb9af7", width=2)
         
         # Status Text with better font
         self.status_label = tk.Label(
