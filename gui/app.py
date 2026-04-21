@@ -132,22 +132,25 @@ class VoiceAssistantGUI:
 
     def update_status(self, text, color="#89b4fa"):
         self.status_label.config(text=text.upper(), fg=color)
-        self.canvas.itemconfig(self.inner_ring, fill=color)
+        self.canvas.itemconfig(self.glow_ring, outline=color)
 
     def update_transcript(self, text):
         self.transcript_label.config(text=text)
 
     def animate_pulse(self):
-        if self.status_label.cget("text") == "LISTENING...":
+        if self.status_label.cget("text") == "RECORDING...":
             if self.pulse_growing:
-                self.pulse_size += 2
-                if self.pulse_size > 20: self.pulse_growing = False
+                self.pulse_size += 3
+                if self.pulse_size > 15: self.pulse_growing = False
             else:
-                self.pulse_size -= 2
+                self.pulse_size -= 3
                 if self.pulse_size < 0: self.pulse_growing = True
             
-            # Update outer ring size
-            self.canvas.coords(self.outer_ring, 75-self.pulse_size, 50-self.pulse_size, 225+self.pulse_size, 200+self.pulse_size)
+            # Update glow ring size around the avatar
+            self.canvas.coords(self.glow_ring, 25-self.pulse_size, 10-self.pulse_size, 275+self.pulse_size, 260+self.pulse_size)
+        else:
+            # Reset to normal size if not recording
+            self.canvas.coords(self.glow_ring, 25, 10, 275, 260)
             
         self.root.after(50, self.animate_pulse)
 
