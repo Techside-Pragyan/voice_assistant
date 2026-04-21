@@ -54,7 +54,7 @@ class VoiceAssistantGUI:
         # Status Text with better font
         self.status_label = tk.Label(
             self.root, 
-            text="SYSTEM READY", 
+            text="VOICE ACTIVE", 
             font=("Inter", 10, "bold"),
             bg="#0f0f1a", 
             fg="#a6e3a1"
