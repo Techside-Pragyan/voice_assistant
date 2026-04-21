@@ -20,20 +20,45 @@ class SpeechRecognizer:
             print(f"Warning: No input device found: {e}")
             self.microphone_missing = True
 
-    def _record_audio(self, duration=5):
+    def _record_audio(self, max_duration=7, silence_threshold=500, silence_limit=1.5):
         """
-        Records audio using sounddevice and returns it as an AudioData object.
+        Records audio and stops automatically when silence is detected.
         """
-        print("Recording...")
-        # Record audio
-        recording = sd.rec(int(duration * self.sample_rate), samplerate=self.sample_rate, channels=1, dtype='int16')
-        sd.wait()  # Wait until recording is finished
+        print("Listening...")
+        chunk_size = 1024
+        audio_data = []
+        
+        # Start a stream to check levels
+        with sd.InputStream(samplerate=self.sample_rate, channels=1, dtype='int16') as stream:
+            silent_chunks = 0
+            total_chunks = 0
+            max_chunks = int(max_duration * self.sample_rate / chunk_size)
+            limit_chunks = int(silence_limit * self.sample_rate / chunk_size)
+            
+            while total_chunks < max_chunks:
+                data, overflowed = stream.read(chunk_size)
+                audio_data.append(data)
+                
+                # Check volume level (RMS)
+                rms = np.sqrt(np.mean(data.astype(float)**2))
+                if rms < silence_threshold:
+                    silent_chunks += 1
+                else:
+                    silent_chunks = 0
+                
+                # If we've had enough silence after some noise, stop
+                if total_chunks > 10 and silent_chunks > limit_chunks:
+                    break
+                total_chunks += 1
+
+        print("Done recording.")
+        recording = np.concatenate(audio_data, axis=0)
         
         # Convert to WAV format in memory
         byte_io = io.BytesIO()
         with wave.open(byte_io, 'wb') as wav_file:
             wav_file.setnchannels(1)
-            wav_file.setsampwidth(2) # 2 bytes for int16
+            wav_file.setsampwidth(2)
             wav_file.setframerate(self.sample_rate)
             wav_file.writeframes(recording.tobytes())
         
@@ -44,20 +69,18 @@ class SpeechRecognizer:
 
     def listen(self, fallback_text=None):
         """
-        Listens for audio input using sounddevice and returns the recognized text.
+        Listens for audio input and returns the recognized text.
         """
         if self.microphone_missing:
             if fallback_text: return fallback_text.lower()
             return ""
 
-        # If a manual text input was provided via GUI, prioritize it
         if fallback_text:
             return fallback_text.lower()
 
         try:
-            # We record a short burst (5 seconds)
-            # Future improvement: use a threshold/silence detection
-            audio = self._record_audio(duration=4)
+            # Auto-detect silence!
+            audio = self._record_audio()
             
             print("Recognizing...")
             query = self.recognizer.recognize_google(audio, language='en-in')
