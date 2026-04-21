@@ -40,9 +40,6 @@ def run_assistant():
             if not should_continue:
                 break
                 
-            # After executing a command, stay active for a bit
-            # active = True # stays true
-            
         except KeyboardInterrupt:
             print("\nStopping assistant...")
             break
@@ -51,4 +48,11 @@ def run_assistant():
             time.sleep(1)
 
 if __name__ == "__main__":
-    run_assistant()
+    if len(sys.argv) > 1 and sys.argv[1] == "--gui":
+        import tkinter as tk
+        from gui.app import VoiceAssistantGUI
+        root = tk.Tk()
+        app = VoiceAssistantGUI(root)
+        root.mainloop()
+    else:
+        run_assistant()
