@@ -155,14 +155,10 @@ class VoiceAssistantGUI:
                     
                     if query and WAKE_WORD in query:
                         active = True
-                        self.update_status("Listening...", "#a6e3a1")
                         tts.speak("How can I help?")
-                    
-                    if not query:
-                        time.sleep(0.1) # Prevent high CPU when idle
                     continue
 
-                self.update_status("Listening...", "#a6e3a1")
+                self.update_status("Recording...", "#f38ba8") # Red for recording
                 query = recognizer.listen(fallback_text=fallback_text)
                 
                 if not query:
