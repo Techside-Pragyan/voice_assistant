@@ -1,3 +1,8 @@
+import webbrowser
+import os
+import datetime
+import wikipediaapi
+import requests
 from speech.tts import tts
 from config.settings import OPENWEATHER_API_KEY
 from utils.memory import memory

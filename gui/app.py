@@ -98,7 +98,6 @@ class VoiceAssistantGUI:
         self.root.after(50, self.animate_pulse)
 
     def run_assistant_logic(self):
-        # ... (rest of logic remains same, just ensure it calls update methods)
         self.update_status("Offline", "#f38ba8")
         tts.speak(f"System online.")
         
