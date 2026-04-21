@@ -13,7 +13,7 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Voice Settings
-VOICE_RATE = 175
+VOICE_RATE = 200
 VOICE_VOLUME = 1.0
 
 # Paths
