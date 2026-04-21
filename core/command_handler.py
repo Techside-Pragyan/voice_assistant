@@ -32,6 +32,12 @@ class CommandHandler:
             self._get_news()
         elif intent == 'change_name':
             self._change_user_name(params[0])
+        elif intent == 'lock_pc':
+            self._lock_pc()
+        elif intent == 'battery':
+            self._get_battery()
+        elif intent == 'routine':
+            self._morning_routine()
         elif intent == 'exit':
             tts.speak("Goodbye! Have a great day.")
             return False
@@ -118,6 +124,49 @@ class CommandHandler:
     def _ask_ai(self, query):
         response = ai_consultant.ask(query)
         tts.speak(response)
+
+    def _lock_pc(self):
+        tts.speak("Locking your PC now.")
+        try:
+            import ctypes
+            ctypes.windll.user32.LockWorkStation()
+        except Exception as e:
+            tts.speak("Failed to lock the PC. I might not have permission.")
+
+    def _get_battery(self):
+        try:
+            import psutil
+            battery = psutil.sensors_battery()
+            percent = battery.percent
+            tts.speak(f"Your system is at {percent} percent battery.")
+            if battery.power_plugged:
+                tts.speak("The charger is currently plugged in.")
+        except Exception:
+            tts.speak("I couldn't retrieve battery information.")
+
+    def _morning_routine(self):
+        user_name = memory.get("user_name", "User")
+        time_str = datetime.datetime.now().strftime("%I:%M %p")
+        
+        # Greeting
+        tts.speak(f"Good morning, {user_name}!")
+        tts.speak(f"It is currently {time_str}.")
+        
+        # Weather stub (could call _get_weather if API key exists)
+        if OPENWEATHER_API_KEY:
+            self._get_weather()
+        
+        # Quote
+        quotes = [
+            "The best way to predict the future is to create it.",
+            "Believe you can and you're halfway there.",
+            "Your limitation—it's only your imagination.",
+            "Push yourself, because no one else is going to do it for you.",
+            "Success is not final, failure is not fatal: it is the courage to continue that counts."
+        ]
+        import random
+        tts.speak(f"Here is your thought for the day: {random.choice(quotes)}")
+        tts.speak("Have a productive day!")
 
     def _handle_unknown(self):
         tts.speak("I'm sorry, I don't know how to do that yet. I'm still learning!")

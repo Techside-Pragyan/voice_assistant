@@ -13,7 +13,10 @@ class IntentEngine:
             'exit': [r'exit', r'stop', r'shutdown', r'bye'],
             'greeting': [r'hello', r'hi', r'hey'],
             'news': [r'news', r'headlines'],
-            'change_name': [r'call me (.+)', r'my name is (.+)', r'change my name to (.+)']
+            'change_name': [r'call me (.+)', r'my name is (.+)', r'change my name to (.+)'],
+            'lock_pc': [r'lock my pc', r'lock the screen', r'i am going out'],
+            'battery': [r'battery', r'how much power'],
+            'routine': [r'good morning', r'start my day', r'routine']
         }
 
     def get_intent(self, text):
