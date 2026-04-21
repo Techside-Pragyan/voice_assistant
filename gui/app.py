@@ -46,29 +46,27 @@ class VoiceAssistantGUI:
         )
         self.subtitle.pack()
 
-        # Voice Visualization & Avatar Area
-        self.canvas = tk.Canvas(self.root, width=300, height=300, bg="#0f0f1a", highlightthickness=0)
-        self.canvas.pack(pady=10)
-        
-        # Load Anime Avatar
+        # Load Anime Avatar (Frames for Talking)
         try:
             from PIL import Image, ImageTk
             import os
-            # Image path from previous generation
-            img_path = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_girl_assistant_avatar_1776784986376.png"
-            if os.path.exists(img_path):
-                img = Image.open(img_path)
-                img = img.resize((250, 250), Image.LANCZOS)
-                self.avatar_img = ImageTk.PhotoImage(img)
-                self.avatar_display = self.canvas.create_image(150, 125, image=self.avatar_img)
-            else:
-                self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#bb9af7", outline="")
+            # Paths
+            path_closed = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_girl_closed_mouth_1776786192765.png"
+            path_open = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\anime_girl_open_mouth_1776786214098.png"
+            
+            self.frames = []
+            for p in [path_closed, path_open]:
+                img = Image.open(p).resize((280, 280), Image.LANCZOS)
+                self.frames.append(ImageTk.PhotoImage(img))
+            
+            self.avatar_display = self.canvas.create_image(150, 140, image=self.frames[0])
+            self.voice_frame_counter = 0
         except Exception as e:
             print(f"Image load error: {e}")
             self.avatar_display = self.canvas.create_oval(75, 50, 225, 200, fill="#bb9af7", outline="")
         
         # Glow Effect Ring (Vibrant Purple/Blue)
-        self.glow_ring = self.canvas.create_oval(25, 10, 275, 260, outline="#bb9af7", width=2)
+        self.glow_ring = self.canvas.create_oval(15, 5, 285, 275, outline="#bb9af7", width=2)
         
         # Status Text with better font
         self.status_label = tk.Label(
@@ -156,8 +154,18 @@ class VoiceAssistantGUI:
             self.update_status("Speaking...", "#a6e3a1") # Green when talking
         
         # Update avatar position
-        self.canvas.coords(self.avatar_display, 150 + jitter_x, 125 + float_y + jitter_y)
+        self.canvas.coords(self.avatar_display, 150 + jitter_x, 140 + float_y + jitter_y)
         
+        # Lip Sync Animation
+        if tts.is_speaking:
+            self.voice_frame_counter += 1
+            # Switch frame every ~150ms
+            frame_idx = (self.voice_frame_counter // 3) % 2
+            self.canvas.itemconfig(self.avatar_display, image=self.frames[frame_idx])
+        else:
+            self.canvas.itemconfig(self.avatar_display, image=self.frames[0])
+            self.voice_frame_counter = 0
+
         # 2. Glow Ring Logic
         if self.status_label.cget("text") == "RECORDING..." or tts.is_speaking:
             if self.pulse_growing:
