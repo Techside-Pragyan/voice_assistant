@@ -141,31 +141,39 @@ class VoiceAssistantGUI:
         # 1. Floating & Breathing Logic
         import math
         import time
+        import random
         
         t = time.time()
-        # Subtle floating (up/down 5 pixels)
+        # Subtle floating
         float_y = math.sin(t * 2) * 5
-        # Subtle breathing (scale pulse 0.98 to 1.02)
-        breath_scale = 1 + (math.sin(t * 1.5) * 0.02)
         
-        # We simulate scaling by moving the image slightly or resizing (resizing is slow, so we float)
-        self.canvas.coords(self.avatar_display, 150, 125 + float_y)
+        # Talking Jitter
+        jitter_x = 0
+        jitter_y = 0
+        if tts.is_speaking:
+            jitter_x = random.randint(-2, 2)
+            jitter_y = random.randint(-2, 2)
+            self.update_status("Speaking...", "#a6e3a1") # Green when talking
         
-        # 2. Glow Ring Logic (Recording State)
-        if self.status_label.cget("text") == "RECORDING...":
+        # Update avatar position
+        self.canvas.coords(self.avatar_display, 150 + jitter_x, 125 + float_y + jitter_y)
+        
+        # 2. Glow Ring Logic
+        if self.status_label.cget("text") == "RECORDING..." or tts.is_speaking:
             if self.pulse_growing:
-                self.pulse_size += 4
-                if self.pulse_size > 20: self.pulse_growing = False
+                self.pulse_size += 5
+                if self.pulse_size > 25: self.pulse_growing = False
             else:
-                self.pulse_size -= 4
+                self.pulse_size -= 5
                 if self.pulse_size < 0: self.pulse_growing = True
             
-            # Bright Purple Glow
-            self.canvas.itemconfig(self.glow_ring, width=4)
+            # Bright glow when active or speaking
+            glow_color = "#a6e3a1" if tts.is_speaking else "#bb9af7"
+            self.canvas.itemconfig(self.glow_ring, width=5, outline=glow_color)
             self.canvas.coords(self.glow_ring, 25-self.pulse_size, 10-self.pulse_size, 275+self.pulse_size, 260+self.pulse_size)
         else:
             self.pulse_size = 0
-            self.canvas.itemconfig(self.glow_ring, width=2)
+            self.canvas.itemconfig(self.glow_ring, width=2, outline="#5865f2")
             self.canvas.coords(self.glow_ring, 25, 10, 275, 260)
             
         self.root.after(50, self.animate_pulse)

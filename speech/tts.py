@@ -22,11 +22,13 @@ class TTSManager:
         self.engine.setProperty('volume', VOICE_VOLUME)
 
     def speak(self, text):
+        self.is_speaking = True
         print(f"Assistant: {text}")
         if self.gui_callback:
             self.gui_callback(f"AURA: {text}")
         self.engine.say(text)
         self.engine.runAndWait()
+        self.is_speaking = False
 
 # Singleton instance
 tts = TTSManager()
