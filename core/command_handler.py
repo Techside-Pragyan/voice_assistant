@@ -16,7 +16,7 @@ class CommandHandler:
             language='en'
         )
 
-    def execute(self, intent, params):
+    def execute(self, intent, params, original_query=None):
         if intent == 'time':
             self._tell_time()
         elif intent == 'date':
@@ -25,8 +25,6 @@ class CommandHandler:
             self._search_google(params[0])
         elif intent == 'wikipedia':
             self._search_wikipedia(params[0])
-        elif intent == 'open_app':
-            self._open_app(params[0])
         elif intent == 'weather':
             self._get_weather()
         elif intent == 'calculate':
@@ -63,9 +61,9 @@ class CommandHandler:
             tts.speak("Goodbye! Have a great day.")
             return False
         else:
-            # If intent is unknown, ask the AI brain (OpenAI)
-            query = params[0] if params else "Hello"
-            self._ask_ai(query)
+            # If intent is unknown, ask the AI brain (OpenAI) with the ORIGINAL query
+            query_to_ask = original_query if original_query else "Hello"
+            self._ask_ai(query_to_ask)
             
         return True
 
