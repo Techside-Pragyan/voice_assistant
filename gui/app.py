@@ -137,47 +137,62 @@ class VoiceAssistantGUI:
 
     def run_assistant_logic(self):
         self.update_status("Standby", "#5865f2")
-        tts.speak(f"System online.")
+        tts.speak(f"AURA system is online.")
         
         active = False
+        last_active_time = 0
         
         import time
         while True:
             try:
-                # Check for manual text commands from the GUI
                 fallback_text = None
                 if self.command_queue:
                     fallback_text = self.command_queue.pop(0)
 
-                if not active:
-                    self.update_status("Standby", "#5865f2")
-                    query = recognizer.listen(fallback_text=fallback_text)
-                    
-                    if query and WAKE_WORD in query:
-                        active = True
-                        tts.speak("How can I help?")
-                    continue
+                # Status updates
+                current_status = "Standby" if not active else "Recording..."
+                self.update_status(current_status, "#5865f2" if not active else "#f38ba8")
 
-                self.update_status("Recording...", "#f38ba8") # Red for recording
                 query = recognizer.listen(fallback_text=fallback_text)
                 
                 if not query:
-                    if recognizer.microphone_missing:
-                        time.sleep(0.1) # Wait for text input
-                    else:
-                        active = False # Timeout on voice
+                    # If we have been active but no one spoke for 10 seconds, go to standby
+                    if active and (time.time() - last_active_time > 10):
+                        active = False
+                        self.update_status("Standby", "#5865f2")
+                    time.sleep(0.1)
                     continue
 
                 self.update_transcript(f"User: {query}")
-                self.update_status("Thinking...", "#fab387")
-                
-                intent, params = intent_engine.get_intent(query)
-                should_continue = command_handler.execute(intent, params)
-                
-                if not should_continue:
-                    self.root.after(1000, self.root.quit)
-                    break
+
+                # Check for wake word
+                wake_word_detected = "aura" in query.lower()
+
+                if wake_word_detected:
+                    active = True
+                    last_active_time = time.time()
                     
+                    # Clean the query (remove the wake word to get the actual command)
+                    clean_query = query.lower().replace("aura", "").replace("hey", "").strip()
+                    
+                    if not clean_query:
+                        # Only the wake word was said
+                        tts.speak("Yes? I'm listening.")
+                        continue
+                    else:
+                        query = clean_query # Process the rest as a command
+
+                if active:
+                    last_active_time = time.time()
+                    self.update_status("Thinking...", "#fab387")
+                    
+                    intent, params = intent_engine.get_intent(query)
+                    should_continue = command_handler.execute(intent, params)
+                    
+                    if not should_continue:
+                        self.root.after(1000, self.root.quit)
+                        break
+                
             except Exception as e:
                 print(f"Logic Error: {e}")
                 time.sleep(1)
