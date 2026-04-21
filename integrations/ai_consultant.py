@@ -1,3 +1,4 @@
+import openai
 from config.settings import OPENAI_API_KEY, ASSISTANT_NAME
 from utils.memory import memory
 
