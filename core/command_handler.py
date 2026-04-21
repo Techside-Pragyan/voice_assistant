@@ -248,24 +248,35 @@ class CommandHandler:
                 break
         
         if target_app:
-            tts.speak(f"Processing. I'm forcing {target_app} to open.")
+            tts.speak(f"Consider it done! I'm opening {target_app} for you now.")
             try:
-                import subprocess
-                # This is the most powerful 'force-launch' command in Windows
-                subprocess.Popen(f"start {target_app}", shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+                # 🛠️ GUARENTEED LAUNCH (Web-Priority)
+                web_links = {
+                    "chrome": "https://www.google.com",
+                    "google": "https://www.google.com",
+                    "spotify": "https://open.spotify.com",
+                    "whatsapp": "https://web.whatsapp.com",
+                    "youtube": "https://youtube.com",
+                    "github": "https://github.com",
+                }
                 
-                # If it's a browser request, double-trigger it
-                if "chrome" in target_app or "google" in target_app:
+                if target_app in web_links:
                     import webbrowser
-                    webbrowser.open("https://www.google.com")
-            except Exception as e:
-                print(f"Force Launch Error: {e}")
+                    webbrowser.open(web_links[target_app])
+                    return
+                
+                # If no web link, use the force-launcher
+                import subprocess
+                subprocess.Popen(f"start {target_app}", shell=True)
+            except Exception:
                 import webbrowser
                 webbrowser.open(f"https://www.google.com/search?q={target_app}")
         else:
-            tts.speak(f"Local app not found. Opening {query} in your web browser.")
+            tts.speak(f"I'll search for {query} on the web for you.")
             import webbrowser
             webbrowser.open(f"https://www.google.com/search?q={query}")
+        
+        return True
 
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")
