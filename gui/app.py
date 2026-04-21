@@ -61,6 +61,19 @@ class VoiceAssistantGUI:
         )
         self.status_label.pack(pady=10)
 
+        # Transcript Area with scrolling capability
+        self.transcript_frame = tk.Frame(self.root, bg="#181825", padx=15, pady=10)
+        self.transcript_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        self.transcript_label = tk.Label(
+            self.transcript_frame, 
+            text="Greeting...", 
+            font=("Inter", 10),
+            bg="#181825", 
+            fg="#cdd6f4",
+            wraplength=320,
+            justify="left"
+        )
         self.transcript_label.pack(anchor="w")
 
         # Fallback Text Input (at the bottom)
