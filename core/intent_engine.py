@@ -20,7 +20,9 @@ class IntentEngine:
             'joke': [r'joke', r'tell me something funny'],
             'screenshot': [r'screenshot', r'take a photo of the screen'],
             'volume': [r'volume to (\d+)', r'set volume to (\d+)'],
-            'stocks': [r'stock price of (.+)', r'how is (.+) stock doing']
+            'stocks': [r'stock price of (.+)', r'how is (.+) stock doing'],
+            'youtube': [r'play (.+) on youtube', r'search (.+) on youtube'],
+            'maps': [r'where is (.+)', r'show me (.+) on map']
         }
 
     def get_intent(self, text):

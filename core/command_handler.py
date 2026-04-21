@@ -49,6 +49,10 @@ class CommandHandler:
             self._take_screenshot()
         elif intent == 'stocks':
             self._get_stock_price(params[0])
+        elif intent == 'youtube':
+            self._play_on_youtube(params[0])
+        elif intent == 'maps':
+            self._search_map(params[0])
         elif intent == 'exit':
             tts.speak("Goodbye! Have a great day.")
             return False
@@ -209,6 +213,14 @@ class CommandHandler:
             tts.speak(f"The current closing price of {ticker.upper()} is {price:.2f} dollars.")
         except Exception:
             tts.speak(f"I couldn't find the stock price for {ticker}. Please make sure you used the correct ticker symbol.")
+
+    def _play_on_youtube(self, query):
+        tts.speak(f"Opening {query} on YouTube")
+        webbrowser.open(f"https://www.youtube.com/results?search_query={query}")
+
+    def _search_map(self, location):
+        tts.speak(f"Finding {location} on Google Maps")
+        webbrowser.open(f"https://www.google.com/maps/search/{location}")
 
     def _handle_unknown(self):
         tts.speak("I'm sorry, I don't know how to do that yet. I'm still learning!")
