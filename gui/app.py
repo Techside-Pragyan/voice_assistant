@@ -139,40 +139,42 @@ class VoiceAssistantGUI:
     def update_transcript(self, text):
         self.transcript_label.config(text=text)
 
-    def animate_pulse(self):
         # 1. Floating & Breathing Logic
         import math
         import time
         import random
         
         t = time.time()
-        # Subtle floating
-        float_y = math.sin(t * 2) * 5
+        # Substantially bigger floating for 'Live' feel
+        float_y = math.sin(t * 3) * 8
+        jitter_x, jitter_y = 0, 0
         
-        # Talking Jitter
-        jitter_x = 0
-        jitter_y = 0
-        if tts.is_speaking:
-            jitter_x = random.randint(-2, 2)
-            jitter_y = random.randint(-2, 2)
-            self.update_status("Speaking...", "#a6e3a1") # Green when talking
-        
-        # Update avatar position
-        self.canvas.coords(self.avatar_display, 150 + jitter_x, 140 + float_y + jitter_y)
-        
-        # Lip Sync Animation
-        if tts.is_speaking:
-            self.voice_frame_counter += 1
-            # Switch frame every ~150ms
-            frame_idx = (self.voice_frame_counter // 3) % 2
-            self.canvas.itemconfig(self.avatar_display, image=self.frames[frame_idx])
-        else:
-            self.canvas.itemconfig(self.avatar_display, image=self.frames[0])
-            self.voice_frame_counter = 0
-
-        # 2. Glow Ring Logic
+        # 2. Status & Talking Logic
         current_text = self.status_label.cget("text")
-        is_active = current_text in ["LISTENING...", "RECORDING...", "SPEAKING...", "THINKING..."]
+        is_talking = "SPEAKING" in current_text or tts.is_speaking
+        
+        if is_talking:
+            jitter_x = random.randint(-3, 3)
+            jitter_y = random.randint(-3, 3)
+            self.update_status("Speaking...", "#a6e3a1")
+        
+        # 3. Avatar Move (Safely handle if image or oval)
+        try:
+            self.canvas.coords(self.avatar_display, 150 + jitter_x, 150 + float_y + jitter_y)
+            if hasattr(self, 'frames') and len(self.frames) > 1:
+                # Active Lip Sync
+                if is_talking:
+                    self.voice_frame_counter += 1
+                    frame_idx = (self.voice_frame_counter // 2) % 2
+                    self.canvas.itemconfig(self.avatar_display, image=self.frames[frame_idx])
+                else:
+                    self.canvas.itemconfig(self.avatar_display, image=self.frames[0])
+                    self.voice_frame_counter = 0
+        except Exception:
+            pass # Prevent total crash if animation fails
+
+        # 4. Glow Ring Logic (Brighter & More Pulsing)
+        is_active = is_talking or current_text in ["LISTENING...", "RECORDING...", "THINKING..."]
         
         if is_active:
             if self.pulse_growing:

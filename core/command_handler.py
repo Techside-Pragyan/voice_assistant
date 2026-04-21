@@ -248,24 +248,32 @@ class CommandHandler:
                 break
         
         if target_app:
-            tts.speak(f"Right away. Launching {target_app} for you.")
+            tts.speak(f"Consider it done. I'm opening {target_app} for you now.")
             try:
+                # Guaranteed method for browser
+                if "chrome" in target_app:
+                    import webbrowser
+                    webbrowser.open("https://google.com")
+                    return
+                
+                if "youtube" in target_app:
+                    import webbrowser
+                    webbrowser.open("https://youtube.com")
+                    return
+
+                if "spotify" in target_app:
+                    import os
+                    os.system("start spotify") # Standard windows command
+                    return
+
+                # Generic start command for everything else
                 import os
-                # Using 'start' as a shell command is most reliable for Windows Shortcuts/Apps
                 os.system(f"start {target_app}")
-            except Exception as e:
-                print(f"App Launch Error: {e}")
+            except Exception:
                 import webbrowser
-                # Fallback to web version
-                web_targets = {
-                    "spotify": "https://open.spotify.com",
-                    "chrome": "https://google.com",
-                    "whatsapp": "https://web.whatsapp.com",
-                }
-                if target_app in web_targets:
-                    webbrowser.open(web_targets[target_app])
+                webbrowser.open(f"https://www.google.com/search?q={target_app}")
         else:
-            tts.speak(f"I couldn't find a local app for {query}, so I'll search for it online.")
+            tts.speak(f"I couldn't find {query} on your desktop, so I'll open it in your browser instead.")
             import webbrowser
             webbrowser.open(f"https://www.google.com/search?q={query}")
 
