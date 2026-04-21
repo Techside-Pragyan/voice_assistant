@@ -53,6 +53,12 @@ class CommandHandler:
             self._play_on_youtube(params[0])
         elif intent == 'maps':
             self._search_map(params[0])
+        elif intent == 'open_app':
+            self._open_application(params[0])
+        elif intent == 'search_chrome':
+            self._chrome_search(params[0])
+        elif intent == 'play_music':
+            self._play_on_youtube(params[0])
         elif intent == 'exit':
             tts.speak("Goodbye! Have a great day.")
             return False
@@ -221,6 +227,38 @@ class CommandHandler:
     def _search_map(self, location):
         tts.speak(f"Finding {location} on Google Maps")
         webbrowser.open(f"https://www.google.com/maps/search/{location}")
+
+    def _open_application(self, app_name):
+        app_name = app_name.lower()
+        tts.speak(f"Opening {app_name}")
+        
+        # Comprehensive mapping
+        apps = {
+            "chrome": "chrome.exe",
+            "google chrome": "chrome.exe",
+            "spotify": "spotify.exe",
+            "whatsapp": "whatsapp:",
+            "vs code": "code",
+            "vscode": "code",
+            "visual studio code": "code",
+            "github": "https://github.com",
+            "youtube": "https://youtube.com",
+            "notion": "notion:",
+        }
+        
+        if app_name in apps:
+            if "http" in apps[app_name]:
+                webbrowser.open(apps[app_name])
+            else:
+                import os
+                os.system(f"start {apps[app_name]}")
+        else:
+            # Try searching on google if app not found
+            webbrowser.open(f"https://www.google.com/search?q=open+{app_name}")
+
+    def _chrome_search(self, query):
+        tts.speak(f"Searching for {query} on Google Chrome")
+        webbrowser.open(f"https://www.google.com/search?q={query}")
 
     def _handle_unknown(self):
         tts.speak("I'm sorry, I don't know how to do that yet. I'm still learning!")

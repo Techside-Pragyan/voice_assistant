@@ -22,7 +22,10 @@ class IntentEngine:
             'volume': [r'volume to (\d+)', r'set volume to (\d+)'],
             'stocks': [r'stock price of (.+)', r'how is (.+) stock doing'],
             'youtube': [r'play (.+) on youtube', r'search (.+) on youtube'],
-            'maps': [r'where is (.+)', r'show me (.+) on map']
+            'maps': [r'where is (.+)', r'show me (.+) on map'],
+            'open_app': [r'open (.+)', r'launch (.+)', r'start (.+)'],
+            'search_chrome': [r'search for (.+) on chrome', r'google (.+)'],
+            'play_music': [r'play (.+) on youtube', r'play (.+) song', r'play (.+) in youtube']
         }
 
     def get_intent(self, text):
