@@ -12,7 +12,8 @@ class IntentEngine:
             'calculate': [r'calculate (.+)', r'what is (\d+ [\+\-\*\/] \d+)'],
             'exit': [r'exit', r'stop', r'shutdown', r'bye'],
             'greeting': [r'hello', r'hi', r'hey'],
-            'news': [r'news', r'headlines']
+            'news': [r'news', r'headlines'],
+            'change_name': [r'call me (.+)', r'my name is (.+)', r'change my name to (.+)']
         }
 
     def get_intent(self, text):
