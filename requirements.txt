@@ -8,3 +8,6 @@ openai
 spacy
 psutil
 pygame
+yfinance
+pyautogui
+ Pillow

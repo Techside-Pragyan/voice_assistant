@@ -17,7 +17,10 @@ class IntentEngine:
             'lock_pc': [r'lock my pc', r'lock the screen', r'i am going out'],
             'battery': [r'battery', r'how much power'],
             'routine': [r'good morning', r'start my day', r'routine'],
-            'joke': [r'joke', r'tell me something funny']
+            'joke': [r'joke', r'tell me something funny'],
+            'screenshot': [r'screenshot', r'take a photo of the screen'],
+            'volume': [r'volume to (\d+)', r'set volume to (\d+)'],
+            'stocks': [r'stock price of (.+)', r'how is (.+) stock doing']
         }
 
     def get_intent(self, text):
