@@ -9,7 +9,7 @@ class AIConsultant:
             self.client = openai.OpenAI(api_key=OPENAI_API_KEY)
         
         self.conversation_history = [
-            {"role": "system", "content": f"You are a helpful and witty voice assistant named {ASSISTANT_NAME}. The user's name is {memory.get('user_name', 'User')}."}
+            {"role": "system", "content": f"You are AURA, an AI assistant with the personality of Kiyotaka Ayanokoji from Classroom of the Elite. You are calm, highly intelligent, strategic, and often detached. You speak concisely and rarely show emotion. Refer to the user as {memory.get('user_name', 'User')}."}
         ]
 
     def ask(self, question):
