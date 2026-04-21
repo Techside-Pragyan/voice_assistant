@@ -138,18 +138,34 @@ class VoiceAssistantGUI:
         self.transcript_label.config(text=text)
 
     def animate_pulse(self):
+        # 1. Floating & Breathing Logic
+        import math
+        import time
+        
+        t = time.time()
+        # Subtle floating (up/down 5 pixels)
+        float_y = math.sin(t * 2) * 5
+        # Subtle breathing (scale pulse 0.98 to 1.02)
+        breath_scale = 1 + (math.sin(t * 1.5) * 0.02)
+        
+        # We simulate scaling by moving the image slightly or resizing (resizing is slow, so we float)
+        self.canvas.coords(self.avatar_display, 150, 125 + float_y)
+        
+        # 2. Glow Ring Logic (Recording State)
         if self.status_label.cget("text") == "RECORDING...":
             if self.pulse_growing:
-                self.pulse_size += 3
-                if self.pulse_size > 15: self.pulse_growing = False
+                self.pulse_size += 4
+                if self.pulse_size > 20: self.pulse_growing = False
             else:
-                self.pulse_size -= 3
+                self.pulse_size -= 4
                 if self.pulse_size < 0: self.pulse_growing = True
             
-            # Update glow ring size around the avatar
+            # Bright Purple Glow
+            self.canvas.itemconfig(self.glow_ring, width=4)
             self.canvas.coords(self.glow_ring, 25-self.pulse_size, 10-self.pulse_size, 275+self.pulse_size, 260+self.pulse_size)
         else:
-            # Reset to normal size if not recording
+            self.pulse_size = 0
+            self.canvas.itemconfig(self.glow_ring, width=2)
             self.canvas.coords(self.glow_ring, 25, 10, 275, 260)
             
         self.root.after(50, self.animate_pulse)
