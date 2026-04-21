@@ -38,6 +38,8 @@ class CommandHandler:
             self._get_battery()
         elif intent == 'routine':
             self._morning_routine()
+        elif intent == 'joke':
+            self._tell_joke()
         elif intent == 'exit':
             tts.speak("Goodbye! Have a great day.")
             return False
@@ -167,6 +169,17 @@ class CommandHandler:
         import random
         tts.speak(f"Here is your thought for the day: {random.choice(quotes)}")
         tts.speak("Have a productive day!")
+
+    def _tell_joke(self):
+        jokes = [
+            "Why don't scientists trust atoms? Because they make up everything!",
+            "Parallel lines have so much in common. It’s a shame they’ll never meet.",
+            "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+            "Why did the scarecrow win an award? Because he was outstanding in his field!",
+            "What do you call a fake noodle? An impasta!"
+        ]
+        import random
+        tts.speak(random.choice(jokes))
 
     def _handle_unknown(self):
         tts.speak("I'm sorry, I don't know how to do that yet. I'm still learning!")
