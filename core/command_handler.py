@@ -8,7 +8,11 @@ from config.settings import OPENWEATHER_API_KEY
 
 class CommandHandler:
     def __init__(self):
-        self.wiki = wikipediaapi.Wikipedia('en')
+        # Wikipedia requires a descriptive User-Agent
+        self.wiki = wikipediaapi.Wikipedia(
+            user_agent='MyVoiceAssistant/1.0 (contact: user@example.com)',
+            language='en'
+        )
 
     def execute(self, intent, params):
         if intent == 'time':
