@@ -203,65 +203,75 @@ class VoiceAssistantGUI:
         self.update_status("Standby", "#5865f2")
         tts.speak(f"Hello! I'm AURA. I'm so happy to talk with you.")
         
-        active = False
-        last_active_time = 0
+        # Start voice listener in background
+        threading.Thread(target=self.voice_listener_loop, daemon=True).start()
         
-        import time
+        active = False
+        last_active_time = time.time()
+        
         while True:
             try:
-                fallback_text = None
-                if self.command_queue:
-                    fallback_text = self.command_queue.pop(0)
-
-                # Status updates
-                # If we are active, we use a warmer 'listening' color
-                current_status = "Standby" if not active else "Listening..."
-                self.update_status(current_status, "#5865f2" if not active else "#bb9af7")
-
-                query = recognizer.listen(fallback_text=fallback_text)
-                
-                if not query:
-                    # Naturally go back to standby after 30 seconds of silence
+                # Check for commands (voice or text)
+                if not self.command_queue:
                     if active and (time.time() - last_active_time > 30):
                         active = False
                         self.update_status("Standby", "#5865f2")
                     time.sleep(0.1)
                     continue
 
+                query = self.command_queue.pop(0)
+                if not query: continue
+
                 self.update_transcript(f"User: {query}")
+                last_active_time = time.time()
 
-                # DIRECT TRIGGER: If user says 'open', 'start', 'play', 'what', or 'how', act immediately!
-                direct_keywords = ["open", "start", "launch", "play", "what", "how", "tell", "show", "search"]
-                is_direct = any(word in query.lower() for word in direct_keywords)
-                
-                wake_words = ["aura", "ora", "aiora", "hiora", "ahura"]
-                wake_word_detected = any(word in query.lower() for word in wake_words)
-
-                if wake_word_detected or is_direct or active:
-                    active = True
-                    last_active_time = time.time()
-                    
-                    # Clean up the query
-                    clean_query = query.lower()
-                    for word in wake_words:
-                        clean_query = clean_query.replace(word, "")
-                    clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
-                    
-                    if not clean_query and wake_word_detected:
-                        tts.speak("I'm listening! What can I do for you?")
-                        continue
-
-                    self.update_status("Thinking...", "#fab387")
-                    intent, params = intent_engine.get_intent(clean_query if clean_query else query)
-                    should_continue = command_handler.execute(intent, params, original_query=clean_query if clean_query else query)
-                    
-                    if not should_continue:
-                        self.root.after(1000, self.root.quit)
-                        break
+                # Process
+                self.process_command(query, active)
+                active = True 
                 
             except Exception as e:
                 print(f"Logic Error: {e}")
                 time.sleep(1)
+
+    def voice_listener_loop(self):
+        while True:
+            try:
+                if tts.is_speaking:
+                    time.sleep(0.5)
+                    continue
+                
+                query = recognizer.listen()
+                if query:
+                    self.command_queue.append(query)
+                else:
+                    time.sleep(0.1)
+            except Exception as e:
+                print(f"Voice Listener Error: {e}")
+                time.sleep(1)
+
+    def process_command(self, query, was_active):
+        direct_keywords = ["open", "start", "launch", "play", "what", "how", "tell", "show", "search"]
+        is_direct = any(word in query.lower() for word in direct_keywords)
+        wake_words = ["aura", "ora", "aiora", "hiora", "ahura"]
+        wake_word_detected = any(word in query.lower() for word in wake_words)
+
+        if wake_word_detected or is_direct or was_active:
+            clean_query = query.lower()
+            for word in wake_words:
+                clean_query = clean_query.replace(word, "")
+            clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
+            
+            if not clean_query and wake_word_detected:
+                tts.speak("I'm listening! What can I do for you?")
+                return
+
+            self.update_status("Thinking...", "#fab387")
+            intent, params = intent_engine.get_intent(clean_query if clean_query else query)
+            should_continue = command_handler.execute(intent, params, original_query=clean_query if clean_query else query)
+            
+            self.update_status("Listening..." if should_continue else "Shutting down", "#bb9af7")
+            if not should_continue:
+                self.root.after(1000, self.root.quit)
 
 if __name__ == "__main__":
     root = tk.Tk()

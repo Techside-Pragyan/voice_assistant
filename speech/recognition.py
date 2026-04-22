@@ -20,11 +20,11 @@ class SpeechRecognizer:
             print(f"Warning: No input device found: {e}")
             self.microphone_missing = True
 
-    def _record_audio(self, max_duration=8, silence_threshold=400, silence_limit=1.0):
+    def _record_audio(self, max_duration=10, silence_threshold=800, silence_limit=0.8, wait_for_speech=3.0):
         """
-        Records audio and stops automatically when silence is detected (High Performance).
+        Records audio and stops automatically when silence is detected (Highly Optimized).
+        Returns None if no speech is detected within wait_for_speech seconds.
         """
-        print("Listening...")
         chunk_size = 1024
         audio_data = []
         
@@ -32,26 +32,46 @@ class SpeechRecognizer:
         with sd.InputStream(samplerate=self.sample_rate, channels=1, dtype='int16') as stream:
             silent_chunks = 0
             total_chunks = 0
-            max_chunks = int(max_duration * self.sample_rate / chunk_size)
+            speech_started = False
+            
+            # Constants for timing
             limit_chunks = int(silence_limit * self.sample_rate / chunk_size)
+            wait_chunks = int(wait_for_speech * self.sample_rate / chunk_size)
+            max_chunks = int(max_duration * self.sample_rate / chunk_size)
+            
+            print("Listening...")
             
             while total_chunks < max_chunks:
                 data, overflowed = stream.read(chunk_size)
-                audio_data.append(data)
-                
-                # Check volume level (RMS)
                 rms = np.sqrt(np.mean(data.astype(float)**2))
-                if rms < silence_threshold:
-                    silent_chunks += 1
-                else:
-                    silent_chunks = 0
                 
-                # If we've had enough silence after some noise, stop
-                if total_chunks > 10 and silent_chunks > limit_chunks:
-                    break
+                if not speech_started:
+                    # Wait for sound to exceed threshold
+                    if rms > silence_threshold:
+                        speech_started = True
+                        print("Recording started...")
+                        audio_data.append(data)
+                    elif total_chunks > wait_chunks:
+                        # No speech detected within timeout
+                        print("No speech detected.")
+                        return None
+                else:
+                    audio_data.append(data)
+                    if rms < silence_threshold:
+                        silent_chunks += 1
+                    else:
+                        silent_chunks = 0
+                    
+                    # Stop if silence limit reached
+                    if silent_chunks > limit_chunks:
+                        print("End of speech detected.")
+                        break
+                
                 total_chunks += 1
 
-        print("Done recording.")
+        if not audio_data:
+            return None
+            
         recording = np.concatenate(audio_data, axis=0)
         
         # Convert to WAV format in memory
@@ -70,6 +90,7 @@ class SpeechRecognizer:
     def listen(self, fallback_text=None):
         """
         Listens for audio input and returns the recognized text.
+        Optimized to skip recognition if no audio was captured.
         """
         if self.microphone_missing:
             if fallback_text: return fallback_text.lower()
@@ -79,10 +100,14 @@ class SpeechRecognizer:
             return fallback_text.lower()
 
         try:
-            # Auto-detect silence!
+            # Auto-detect speech and return early if silent
             audio = self._record_audio()
             
+            if audio is None:
+                return ""
+            
             print("Recognizing...")
+            # Use a slightly more robust timeout for the request itself
             query = self.recognizer.recognize_google(audio, language='en-in')
             print(f"User: {query}")
             return query.lower()

@@ -110,7 +110,7 @@ class CommandHandler:
         city = "London"
         url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={OPENWEATHER_API_KEY}&units=metric"
         try:
-            response = requests.get(url).json()
+            response = requests.get(url, timeout=5).json()
             if response["cod"] != "404":
                 main = response["main"]
                 weather = response["weather"][0]["description"]
