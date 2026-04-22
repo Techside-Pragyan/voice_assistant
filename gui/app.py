@@ -216,7 +216,7 @@ class VoiceAssistantGUI:
                     if active and (time.time() - last_active_time > 30):
                         active = False
                         self.update_status("Standby", "#5865f2")
-                    time.sleep(0.1)
+                    time.sleep(0.05) # Faster polling
                     continue
 
                 query = self.command_queue.pop(0)
@@ -230,24 +230,22 @@ class VoiceAssistantGUI:
                 active = True 
                 
             except Exception as e:
-                print(f"Logic Error: {e}")
-                time.sleep(1)
+                time.sleep(0.5)
 
     def voice_listener_loop(self):
         while True:
             try:
                 if tts.is_speaking:
-                    time.sleep(0.5)
+                    time.sleep(0.1) # Faster check
                     continue
                 
                 query = recognizer.listen()
                 if query:
                     self.command_queue.append(query)
                 else:
-                    time.sleep(0.1)
+                    time.sleep(0.05) # Faster loop
             except Exception as e:
-                print(f"Voice Listener Error: {e}")
-                time.sleep(1)
+                time.sleep(0.5)
 
     def process_command(self, query, was_active):
         direct_keywords = ["open", "start", "launch", "play", "what", "how", "tell", "show", "search"]

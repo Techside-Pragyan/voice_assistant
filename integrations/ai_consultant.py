@@ -9,19 +9,19 @@ class AIConsultant:
             self.client = openai.OpenAI(api_key=OPENAI_API_KEY)
         
         self.conversation_history = [
-            {"role": "system", "content": f"You are AURA, an elegant and highly capable female AI assistant. You are warm, intelligent, and proactive. You speak clearly and professionally, like a high-end virtual partner. Refer to the user as {memory.get('user_name', 'User')}."}
+            {"role": "system", "content": f"You are AURA, a fast AI assistant. Be concise. User: {memory.get('user_name', 'User')}."}
         ]
 
     def ask(self, question):
         if not OPENAI_API_KEY or "your_" in OPENAI_API_KEY:
-            return "I'm sorry, my AI brain is not connected yet. Please add your OpenAI API key to the .env file. However, I can still open apps for you!"
+            return "AI brain disconnected. Check .env."
             
         try:
             self.conversation_history.append({"role": "user", "content": question})
             
-            # Keep only the last 10 messages for context
-            if len(self.conversation_history) > 11:
-                self.conversation_history = [self.conversation_history[0]] + self.conversation_history[-10:]
+            # Keep only the last 4 messages for ultra-fast context processing
+            if len(self.conversation_history) > 5:
+                self.conversation_history = [self.conversation_history[0]] + self.conversation_history[-4:]
 
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
