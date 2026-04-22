@@ -18,12 +18,13 @@ class TTSManager:
                 self.engine.setProperty('voice', voice.id)
                 break
         
-        self.engine.setProperty('rate', VOICE_RATE)
+        # Increased rate for faster response
+        self.engine.setProperty('rate', 225) 
         self.engine.setProperty('volume', VOICE_VOLUME)
 
     def speak(self, text):
+        if not text: return
         self.is_speaking = True
-        print(f"Assistant: {text}")
         if self.gui_callback:
             self.gui_callback(f"AURA: {text}")
         self.engine.say(text)
