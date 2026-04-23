@@ -263,8 +263,13 @@ class VoiceAssistantGUI:
                 tts.speak("I'm listening! What can I do for you?")
                 return
 
-            self.update_status("Thinking...", "#fab387")
+            # Only show "Thinking..." for potentially slow operations
+            slow_intents = ["unknown", "wikipedia", "weather", "news", "stocks"]
             intent, params = intent_engine.get_intent(clean_query if clean_query else query)
+            
+            if intent in slow_intents:
+                self.update_status("Thinking...", "#fab387")
+            
             should_continue = command_handler.execute(intent, params, original_query=clean_query if clean_query else query)
             
             self.update_status("Listening..." if should_continue else "Shutting down", "#bb9af7")

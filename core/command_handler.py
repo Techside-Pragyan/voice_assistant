@@ -141,8 +141,9 @@ class CommandHandler:
         tts.speak(f"Alright, I'll call you {new_name} from now on.")
 
     def _ask_ai(self, query):
-        response = ai_consultant.ask(query)
-        tts.speak(response)
+        for sentence in ai_consultant.ask_stream(query):
+            if sentence:
+                tts.speak(sentence)
 
     def _lock_pc(self):
         tts.speak("Locking your PC now.")
