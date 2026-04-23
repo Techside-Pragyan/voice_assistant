@@ -1,6 +1,5 @@
 speechrecognition
 pyttsx3
-pyaudio
 wikipedia-api
 requests
 python-dotenv
