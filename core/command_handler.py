@@ -51,6 +51,8 @@ class CommandHandler:
             self._play_on_youtube(params[0])
         elif intent == 'maps':
             self._search_map(params[0])
+        elif intent == 'web_search':
+            self._web_search(params[0])
         elif intent == 'open_app':
             self._open_application(params[0])
         elif intent == 'window_control':
