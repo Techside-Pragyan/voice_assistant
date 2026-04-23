@@ -13,6 +13,7 @@ class IntentEngine:
             'window_control': [r'close (this |the )?window', r'switch to (.+)', r'maximize (.+)'],
             'take_note': [r'take a note (.+)', r'write down (.+)', r'remember (.+)'],
             'organize_files': [r'organize my files', r'clean my downloads', r'organize downloads'],
+            'draft_content': [r'write (a |an )?(detailed )?(.+) on (.+)', r'draft (.+) about (.+)', r'write a paper on (.+)'],
             'app_search': [r'open (.+) and (search for|play) (.+)', r'(search|play) (.+) on (.+)', r'^(youtube|spotify|google|amazon) (.+)'],
             'web_search': [r'search the web for (.+)', r'find out (.+)', r'who is (.+)', r'what is the latest (.+)'],
             'timer': [r'set (a )?timer for (\d+) minutes', r'timer (\d+) minutes', r'remind me in (\d+) minutes'],

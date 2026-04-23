@@ -53,6 +53,10 @@ class CommandHandler:
             self._play_on_youtube(params[0])
         elif intent == 'maps':
             self._search_map(params[0])
+        elif intent == 'draft_content':
+            # params might be (detailed, type, topic)
+            topic = params[-1] if params else "Unknown Topic"
+            self._write_content(topic)
         elif intent == 'app_search':
             self._handle_app_search(params)
         elif intent == 'web_search':
@@ -507,6 +511,26 @@ class CommandHandler:
             )
         except Exception:
             pass
+
+    def _write_content(self, topic):
+        tts.speak(f"Starting work on {topic}. This might take a moment as I'm drafting a detailed version.")
+        
+        # Use AI to generate long content
+        prompt = f"Write a detailed, professional, and long-form piece on the topic: {topic}. Include sections and a conclusion. Format it nicely."
+        content = ""
+        
+        # Stream the thought process
+        for sentence in ai_consultant.ask_stream(prompt):
+            content += sentence + "\n"
+        
+        try:
+            filename = f"draft_{datetime.datetime.now().strftime('%H%M%S')}.txt"
+            with open(filename, "w", encoding='utf-8') as f:
+                f.write(content)
+            tts.speak(f"Done! I've written a detailed piece on {topic} and saved it as {filename}. You can check it now.")
+            os.system(f"start {filename}")
+        except Exception as e:
+            tts.speak(f"I finished writing, but couldn't save the file: {e}")
 
     def _handle_personality(self, query):
         query = query.lower()

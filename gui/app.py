@@ -260,18 +260,30 @@ class VoiceAssistantGUI:
             
             if not clean_query and wake_word_detected:
                 import winsound
-                winsound.Beep(1000, 150) # Frequency 1000Hz, Duration 150ms
+                winsound.Beep(1000, 150)
                 tts.speak("I'm listening! What can I do for you?")
                 return
 
-            # Only show "Thinking..." for potentially slow operations
-            slow_intents = ["unknown", "wikipedia", "weather", "news", "stocks"]
-            intent, params = intent_engine.get_intent(clean_query if clean_query else query)
-            
-            if intent in slow_intents:
-                self.update_status("Thinking...", "#fab387")
-            
-            should_continue = command_handler.execute(intent, params, original_query=clean_query if clean_query else query)
+            # Check for multiple commands separated by "then" or "and finally"
+            commands = []
+            if " then " in clean_query:
+                commands = [c.strip() for c in clean_query.split(" then ")]
+            elif " and finally " in clean_query:
+                commands = [c.strip() for c in clean_query.split(" and finally ")]
+            else:
+                commands = [clean_query if clean_query else query]
+
+            for cmd in commands:
+                self.update_transcript(f"Executing: {cmd}")
+                intent, params = intent_engine.get_intent(cmd)
+                
+                # Only show "Thinking..." for potentially slow operations
+                slow_intents = ["unknown", "wikipedia", "weather", "news", "stocks", "draft_content", "web_search"]
+                if intent in slow_intents:
+                    self.update_status("Thinking...", "#fab387")
+                
+                should_continue = command_handler.execute(intent, params, original_query=cmd)
+                if not should_continue: break
             
             self.update_status("Listening..." if should_continue else "Shutting down", "#bb9af7")
             if not should_continue:
