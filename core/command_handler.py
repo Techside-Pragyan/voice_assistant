@@ -367,6 +367,26 @@ class CommandHandler:
         
         tts.speak(f"Done! Organized {count} files into categories.")
 
+    def _manage_windows(self, action, target=None):
+        import pygetwindow as gw
+        try:
+            if "close" in action:
+                active = gw.getActiveWindow()
+                if active:
+                    active.close()
+                    tts.speak(f"Closed {active.title}")
+            elif "switch" in action or "maximize" in action:
+                if target:
+                    windows = gw.getWindowsWithTitle(target)
+                    if windows:
+                        windows[0].activate()
+                        if "maximize" in action: windows[0].maximize()
+                        tts.speak(f"Switched to {target}")
+                    else:
+                        tts.speak(f"I couldn't find a window for {target}")
+        except Exception as e:
+            tts.speak(f"Window management failed: {e}")
+
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")
         webbrowser.open(f"https://www.google.com/search?q={query}")
