@@ -53,6 +53,8 @@ class CommandHandler:
             self._play_on_youtube(params[0])
         elif intent == 'maps':
             self._search_map(params[0])
+        elif intent == 'app_search':
+            self._handle_app_search(params)
         elif intent == 'web_search':
             self._web_search(params[0])
         elif intent == 'timer':
@@ -411,6 +413,33 @@ class CommandHandler:
         except Exception:
             tts.speak("Search failed. I'll open Google for you.")
             webbrowser.open(f"https://www.google.com/search?q={query}")
+
+    def _handle_app_search(self, params):
+        # params could be (app, action, query) or (action, query, app)
+        if len(params) == 3:
+            # Check which order we have
+            if any(app in params[0].lower() for app in ["youtube", "spotify", "google", "amazon", "chrome"]):
+                app, action, query = params[0], params[1], params[2]
+            else:
+                action, query, app = params[0], params[1], params[2]
+            
+            app = app.lower()
+            query = query.strip()
+            
+            if "youtube" in app:
+                self._play_on_youtube(query)
+            elif "spotify" in app:
+                tts.speak(f"Playing {query} on Spotify.")
+                webbrowser.open(f"https://open.spotify.com/search/{query}")
+            elif "amazon" in app:
+                tts.speak(f"Searching for {query} on Amazon.")
+                webbrowser.open(f"https://www.amazon.com/s?k={query}")
+            elif "google" in app or "chrome" in app:
+                self._chrome_search(query)
+            else:
+                # Default to web search
+                tts.speak(f"Searching for {query} on {app}.")
+                webbrowser.open(f"https://www.google.com/search?q={query}+{app}")
 
     def _set_timer(self, duration_str):
         try:
