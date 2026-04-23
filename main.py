@@ -15,6 +15,9 @@ def run_assistant():
         try:
             # If not active, listen for the wake word
             if not active:
+                if tts.is_speaking:
+                    time.sleep(0.1)
+                    continue
                 print(f"Waiting for wake word: '{WAKE_WORD}'...")
                 query = recognizer.listen()
                 
@@ -24,6 +27,10 @@ def run_assistant():
                 continue
 
             # If active, listen for commands
+            if tts.is_speaking:
+                time.sleep(0.1)
+                continue
+                
             query = recognizer.listen()
             
             if not query:
