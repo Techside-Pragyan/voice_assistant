@@ -8,57 +8,61 @@ import logging
 class SpeechRecognizer:
     def __init__(self):
         self.recognizer = sr.Recognizer()
+        self.recognizer.energy_threshold = 300 # More sensitive
+        self.recognizer.dynamic_energy_threshold = False # Faster start
         self.sample_rate = 16000
         self.microphone_missing = False
         
-        print("Initializing AURA Voice Engine (using sounddevice)...")
-        # Test if sounddevice can see a default input device
+        print("Initializing AURA Voice Engine (Optimized)...")
         try:
             sd.query_devices(kind='input')
-            print("Microphone detected!")
         except Exception as e:
             print(f"Warning: No input device found: {e}")
             self.microphone_missing = True
 
-    def _record_audio(self, max_duration=8, silence_threshold=600, silence_limit=0.45, wait_for_speech=1.5):
+    def _record_audio(self, max_duration=7, silence_threshold=500, silence_limit=0.35, wait_for_speech=1.2):
         """
-        Ultra-fast audio recording. Optimized for near-instant response.
+        Hyper-optimized audio recording. 
+        - Lower silence limit (0.35s) for instant cutoff after speaking.
+        - Lower wait_for_speech (1.2s) to stop listening faster if no speech.
         """
-        chunk_size = 1024
+        chunk_size = 512 # Smaller chunks for finer control
         audio_data = []
         
-        with sd.InputStream(samplerate=self.sample_rate, channels=1, dtype='int16') as stream:
-            silent_chunks = 0
-            total_chunks = 0
-            speech_started = False
-            
-            # Pre-calculate limits for speed
-            limit_chunks = int(silence_limit * self.sample_rate / chunk_size)
-            wait_chunks = int(wait_for_speech * self.sample_rate / chunk_size)
-            max_chunks = int(max_duration * self.sample_rate / chunk_size)
-            
-            while total_chunks < max_chunks:
-                data, _ = stream.read(chunk_size)
-                # Use max amplitude instead of RMS for raw speed
-                amplitude = np.max(np.abs(data))
+        try:
+            with sd.InputStream(samplerate=self.sample_rate, channels=1, dtype='int16') as stream:
+                silent_chunks = 0
+                total_chunks = 0
+                speech_started = False
                 
-                if not speech_started:
-                    if amplitude > silence_threshold:
-                        speech_started = True
-                        audio_data.append(data)
-                    elif total_chunks > wait_chunks:
-                        return None
-                else:
-                    audio_data.append(data)
-                    if amplitude < silence_threshold:
-                        silent_chunks += 1
-                    else:
-                        silent_chunks = 0
+                # Pre-calculate limits for speed
+                limit_chunks = int(silence_limit * self.sample_rate / chunk_size)
+                wait_chunks = int(wait_for_speech * self.sample_rate / chunk_size)
+                max_chunks = int(max_duration * self.sample_rate / chunk_size)
+                
+                while total_chunks < max_chunks:
+                    data, _ = stream.read(chunk_size)
+                    amplitude = np.max(np.abs(data))
                     
-                    if silent_chunks > limit_chunks:
-                        break
-                
-                total_chunks += 1
+                    if not speech_started:
+                        if amplitude > silence_threshold:
+                            speech_started = True
+                            audio_data.append(data)
+                        elif total_chunks > wait_chunks:
+                            return None
+                    else:
+                        audio_data.append(data)
+                        if amplitude < silence_threshold:
+                            silent_chunks += 1
+                        else:
+                            silent_chunks = 0
+                        
+                        if silent_chunks > limit_chunks:
+                            break
+                    
+                    total_chunks += 1
+        except Exception:
+            return None
 
         if not audio_data: return None
         recording = np.concatenate(audio_data, axis=0)
@@ -82,10 +86,15 @@ class SpeechRecognizer:
             audio = self._record_audio()
             if not audio: return ""
             
-            # Using recognize_google with show_all=False for slightly faster processing
-            return self.recognizer.recognize_google(audio, language='en-in').lower()
-        except:
+            # Using recognize_google with show_all=False
+            # Google is generally the fastest cloud-based choice for short phrases
+            text = self.recognizer.recognize_google(audio, language='en-in')
+            return text.lower()
+        except sr.UnknownValueError:
+            return ""
+        except Exception:
             return ""
 
 # Singleton instance
 recognizer = SpeechRecognizer()
+
