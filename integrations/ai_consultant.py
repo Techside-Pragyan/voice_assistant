@@ -43,10 +43,12 @@ class AIConsultant:
                     full_answer += content
                     current_sentence += content
                     
-                    # If we have a complete sentence, yield it
-                    if any(punct in content for punct in ['.', '!', '?', '\n']):
-                        yield current_sentence.strip()
-                        current_sentence = ""
+                    # If we have a complete sentence or a significant pause (comma), yield it
+                    # This makes TTS start much faster for long sentences
+                    if any(punct in content for punct in ['.', '!', '?', '\n', ',']):
+                        if len(current_sentence.strip()) > 10 or '.' in content: 
+                            yield current_sentence.strip()
+                            current_sentence = ""
 
             if current_sentence.strip():
                 yield current_sentence.strip()
