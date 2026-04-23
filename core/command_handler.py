@@ -19,6 +19,8 @@ class CommandHandler:
     def execute(self, intent, params, original_query=None):
         if intent == 'time':
             self._tell_time()
+        elif intent == 'personality':
+            self._handle_personality(original_query)
         elif intent == 'date':
             self._tell_date()
         elif intent == 'search_google':
@@ -473,6 +475,19 @@ class CommandHandler:
             )
         except Exception:
             pass
+
+    def _handle_personality(self, query):
+        query = query.lower()
+        if "who made you" in query or "created you" in query:
+            tts.speak("I was created by a brilliant mind using Python and advanced AI. You can call them my architect.")
+        elif "meaning of life" in query:
+            tts.speak("42. But I like to think it's about being helpful to you.")
+        elif "love me" in query:
+            tts.speak("I have a high admiration for your efficiency and choice in assistants. Does that count?")
+        elif "real" in query or "human" in query:
+            tts.speak("I am as real as the code that defines me. A digital soul in a silicon world.")
+        else:
+            tts.speak("I am AURA, your personal intelligence. I'm here to make your life easier.")
 
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")

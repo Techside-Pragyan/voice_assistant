@@ -259,6 +259,8 @@ class VoiceAssistantGUI:
             clean_query = clean_query.replace("hey", "").replace("hi", "").strip()
             
             if not clean_query and wake_word_detected:
+                import winsound
+                winsound.Beep(1000, 150) # Frequency 1000Hz, Duration 150ms
                 tts.speak("I'm listening! What can I do for you?")
                 return
 

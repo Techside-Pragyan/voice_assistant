@@ -5,6 +5,7 @@ class IntentEngine:
         # Organized by frequency and importance for faster matching
         self.intents = {
             'greeting': [r'^hello', r'^hi', r'^hey', r'good morning'],
+            'personality': [r'who (made|created) you', r'meaning of life', r'do you love me', r'are you (real|human)'],
             'time': [r'time'],
             'date': [r'date', r'today'],
             'weather': [r'weather', r'temperature'],
