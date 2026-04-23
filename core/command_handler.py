@@ -53,6 +53,8 @@ class CommandHandler:
             self._search_map(params[0])
         elif intent == 'open_app':
             self._open_application(params[0])
+        elif intent == 'window_control':
+            self._manage_windows(params[0], params[1] if len(params) > 1 else None)
         elif intent == 'system_control':
             self._manage_system(params[0])
         elif intent == 'take_note':
