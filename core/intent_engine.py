@@ -9,6 +9,7 @@ class IntentEngine:
             'date': [r'date', r'today'],
             'weather': [r'weather', r'temperature'],
             'system_control': [r'volume (up|down|mute|unmute)', r'brightness (up|down|increase|decrease)', r'shutdown', r'restart', r'sleep'],
+            'window_control': [r'close (this |the )?window', r'switch to (.+)', r'maximize (.+)'],
             'take_note': [r'take a note (.+)', r'write down (.+)', r'remember (.+)'],
             'organize_files': [r'organize my files', r'clean my downloads', r'organize downloads'],
             'open_app': [r'open (.+)', r'launch (.+)', r'start (.+)'],
