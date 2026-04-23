@@ -20,7 +20,7 @@ class SpeechRecognizer:
             print(f"Warning: No input device found: {e}")
             self.microphone_missing = True
 
-    def _record_audio(self, max_duration=7, silence_threshold=500, silence_limit=0.35, wait_for_speech=1.2):
+    def _record_audio(self, max_duration=7, silence_threshold=500, silence_limit=0.3, wait_for_speech=0.8):
         """
         Hyper-optimized audio recording. 
         - Lower silence limit (0.35s) for instant cutoff after speaking.
