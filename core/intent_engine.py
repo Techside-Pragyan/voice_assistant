@@ -12,6 +12,7 @@ class IntentEngine:
             'window_control': [r'close (this |the )?window', r'switch to (.+)', r'maximize (.+)'],
             'take_note': [r'take a note (.+)', r'write down (.+)', r'remember (.+)'],
             'organize_files': [r'organize my files', r'clean my downloads', r'organize downloads'],
+            'web_search': [r'search the web for (.+)', r'find out (.+)', r'who is (.+)', r'what is the latest (.+)'],
             'open_app': [r'open (.+)', r'launch (.+)', r'start (.+)'],
             'play_music': [r'play (.+)'],
             'search_google': [r'search for (.+)', r'google (.+)', r'search (.+) on google'],

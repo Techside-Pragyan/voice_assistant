@@ -389,6 +389,21 @@ class CommandHandler:
         except Exception as e:
             tts.speak(f"Window management failed: {e}")
 
+    def _web_search(self, query):
+        from duckduckgo_search import DDGS
+        tts.speak(f"Let me check the latest on {query}...")
+        try:
+            with DDGS() as ddgs:
+                results = [r for r in ddgs.text(query, max_results=3)]
+                if results:
+                    summary = results[0]['body'][:300]
+                    tts.speak(f"According to the web: {summary}")
+                else:
+                    tts.speak("I couldn't find any recent information on that.")
+        except Exception:
+            tts.speak("Search failed. I'll open Google for you.")
+            webbrowser.open(f"https://www.google.com/search?q={query}")
+
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")
         webbrowser.open(f"https://www.google.com/search?q={query}")
