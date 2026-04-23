@@ -5,9 +5,7 @@ wikipedia-api
 requests
 python-dotenv
 openai
-spacy
 psutil
-pygame
 yfinance
 pyautogui
  Pillow
