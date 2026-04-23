@@ -53,10 +53,12 @@ class CommandHandler:
             self._search_map(params[0])
         elif intent == 'open_app':
             self._open_application(params[0])
-        elif intent == 'search_chrome':
-            self._chrome_search(params[0])
-        elif intent == 'play_music':
-            self._play_on_youtube(params[0])
+        elif intent == 'system_control':
+            self._manage_system(params[0])
+        elif intent == 'take_note':
+            self._take_note(params[0])
+        elif intent == 'organize_files':
+            self._organize_files()
         elif intent == 'exit':
             tts.speak("Goodbye! Have a great day.")
             return False
@@ -235,11 +237,16 @@ class CommandHandler:
             "chrome": ["chrome", "google chrome"],
             "spotify": ["spotify"],
             "whatsapp": ["whatsapp"],
-            "code": ["code"],
-            "vs code": ["code"],
+            "code": ["code", "vs code"],
             "notion": ["notion"],
             "calculator": ["calc"],
             "notepad": ["notepad"],
+            "word": ["winword"],
+            "excel": ["excel"],
+            "powerpoint": ["powerpnt"],
+            "task manager": ["taskmgr"],
+            "settings": ["start ms-settings:"],
+            "control panel": ["control"],
         }
         
         target_app = None
@@ -249,35 +256,116 @@ class CommandHandler:
                 break
         
         if target_app:
-            tts.speak(f"Consider it done! I'm opening {target_app} for you now.")
+            tts.speak(f"Launching {target_app} immediately.")
             try:
-                # 🛠️ GUARENTEED LAUNCH (Web-Priority)
-                web_links = {
-                    "chrome": "https://www.google.com",
-                    "google": "https://www.google.com",
-                    "spotify": "https://open.spotify.com",
-                    "whatsapp": "https://web.whatsapp.com",
-                    "youtube": "https://youtube.com",
-                    "github": "https://github.com",
-                }
-                
-                if target_app in web_links:
-                    import webbrowser
-                    webbrowser.open(web_links[target_app])
-                    return
-                
-                # If no web link, use the force-launcher
                 import subprocess
-                subprocess.Popen(f"start {target_app}", shell=True)
+                if target_app in ["chrome", "spotify", "whatsapp"]:
+                    web_links = {
+                        "chrome": "https://www.google.com",
+                        "spotify": "https://open.spotify.com",
+                        "whatsapp": "https://web.whatsapp.com"
+                    }
+                    webbrowser.open(web_links[target_app])
+                else:
+                    cmd = apps[target_app][0]
+                    subprocess.Popen(f"start {cmd}", shell=True)
             except Exception:
-                import webbrowser
                 webbrowser.open(f"https://www.google.com/search?q={target_app}")
         else:
-            tts.speak(f"I'll search for {query} on the web for you.")
-            import webbrowser
+            tts.speak(f"I'll search for {query} for you.")
             webbrowser.open(f"https://www.google.com/search?q={query}")
         
         return True
+
+    def _manage_system(self, action):
+        import screen_brightness_control as sbc
+        from ctypes import cast, POINTER
+        from comtypes import CLSCTX_ALL
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        
+        try:
+            if "brightness" in action:
+                if "increase" in action or "up" in action:
+                    current = sbc.get_brightness()[0]
+                    sbc.set_brightness(min(100, current + 20))
+                    tts.speak("Brightness increased.")
+                elif "decrease" in action or "down" in action:
+                    current = sbc.get_brightness()[0]
+                    sbc.set_brightness(max(0, current - 20))
+                    tts.speak("Brightness decreased.")
+            
+            elif "volume" in action:
+                devices = AudioUtilities.GetSpeakers()
+                interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                volume = cast(interface, POINTER(IAudioEndpointVolume))
+                
+                if "mute" in action:
+                    volume.SetMute(1, None)
+                    tts.speak("Muted.")
+                elif "unmute" in action:
+                    volume.SetMute(0, None)
+                    tts.speak("Unmuted.")
+                elif "increase" in action or "up" in action:
+                    current = volume.GetMasterVolumeLevelScalar()
+                    volume.SetMasterVolumeLevelScalar(min(1.0, current + 0.1), None)
+                    tts.speak("Volume up.")
+                elif "decrease" in action or "down" in action:
+                    current = volume.GetMasterVolumeLevelScalar()
+                    volume.SetMasterVolumeLevelScalar(max(0.0, current - 0.1), None)
+                    tts.speak("Volume down.")
+            
+            elif "shutdown" in action:
+                tts.speak("Shutting down the system in 10 seconds.")
+                os.system("shutdown /s /t 10")
+            elif "restart" in action:
+                tts.speak("Restarting the system.")
+                os.system("shutdown /r /t 1")
+            elif "sleep" in action:
+                tts.speak("Going to sleep.")
+                os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+                
+        except Exception as e:
+            tts.speak(f"I couldn't complete the system task: {e}")
+
+    def _take_note(self, text):
+        try:
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open("notes.txt", "a") as f:
+                f.write(f"[{timestamp}] {text}\n")
+            tts.speak("Note saved successfully.")
+        except Exception:
+            tts.speak("I couldn't save the note.")
+
+    def _organize_files(self, folder_path=None):
+        if not folder_path:
+            folder_path = os.path.join(os.environ['USERPROFILE'], 'Downloads')
+        
+        tts.speak(f"Organizing files in {os.path.basename(folder_path)}")
+        
+        extensions = {
+            'Images': ['.jpg', '.jpeg', '.png', '.gif', '.bmp'],
+            'Documents': ['.pdf', '.doc', '.docx', '.txt', '.pptx', '.csv', '.xlsx'],
+            'Audio': ['.mp3', '.wav', '.flac', '.m4a'],
+            'Video': ['.mp4', '.mkv', '.mov', '.avi'],
+            'Archives': ['.zip', '.rar', '.7z', '.tar'],
+            'Executables': ['.exe', '.msi']
+        }
+        
+        import shutil
+        count = 0
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path):
+                ext = os.path.splitext(filename)[1].lower()
+                for category, exts in extensions.items():
+                    if ext in exts:
+                        dest_dir = os.path.join(folder_path, category)
+                        os.makedirs(dest_dir, exist_ok=True)
+                        shutil.move(file_path, os.path.join(dest_dir, filename))
+                        count += 1
+                        break
+        
+        tts.speak(f"Done! Organized {count} files into categories.")
 
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")
