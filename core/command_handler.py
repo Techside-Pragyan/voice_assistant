@@ -53,6 +53,10 @@ class CommandHandler:
             self._search_map(params[0])
         elif intent == 'web_search':
             self._web_search(params[0])
+        elif intent == 'timer':
+            self._set_timer(params[0])
+        elif intent == 'news':
+            self._get_news()
         elif intent == 'open_app':
             self._open_application(params[0])
         elif intent == 'window_control':
@@ -405,6 +409,70 @@ class CommandHandler:
         except Exception:
             tts.speak("Search failed. I'll open Google for you.")
             webbrowser.open(f"https://www.google.com/search?q={query}")
+
+    def _set_timer(self, duration_str):
+        try:
+            import re
+            import threading
+            from plyer import notification
+            
+            # Extract number
+            match = re.search(r'(\d+)', duration_str)
+            if not match:
+                tts.speak("How many minutes should I set the timer for?")
+                return
+            
+            minutes = int(match.group(1))
+            seconds = minutes * 60
+            
+            tts.speak(f"Timer started for {minutes} minutes. I'll notify you when it's up.")
+            
+            def timer_thread():
+                time.sleep(seconds)
+                notification.notify(
+                    title="AURA Timer",
+                    message=f"Your {minutes} minute timer is up!",
+                    app_name="AURA",
+                    timeout=10
+                )
+                tts.speak(f"Time's up! Your {minutes} minute timer is finished.")
+            
+            threading.Thread(target=timer_thread, daemon=True).start()
+        except Exception as e:
+            tts.speak(f"Failed to set timer: {e}")
+
+    def _get_news(self):
+        from config.settings import NEWS_API_KEY
+        if not NEWS_API_KEY or "your_" in NEWS_API_KEY:
+            # Fallback to web search if no API key
+            self._web_search("latest world news")
+            return
+
+        try:
+            from newsapi import NewsApiClient
+            newsapi = NewsApiClient(api_key=NEWS_API_KEY)
+            top_headlines = newsapi.get_top_headlines(language='en', page_size=3)
+            
+            if top_headlines['status'] == 'ok' and top_headlines['articles']:
+                tts.speak("Here are the top headlines for today:")
+                for article in top_headlines['articles']:
+                    tts.speak(f"{article['title']}. ")
+            else:
+                self._web_search("top news today")
+        except Exception:
+            self._web_search("top news today")
+
+    def _notify(self, title, message):
+        from plyer import notification
+        try:
+            notification.notify(
+                title=title,
+                message=message,
+                app_name="AURA",
+                timeout=5
+            )
+        except Exception:
+            pass
 
     def _chrome_search(self, query):
         tts.speak(f"Searching for {query} on Google Chrome")

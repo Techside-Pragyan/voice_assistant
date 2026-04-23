@@ -13,6 +13,8 @@ class IntentEngine:
             'take_note': [r'take a note (.+)', r'write down (.+)', r'remember (.+)'],
             'organize_files': [r'organize my files', r'clean my downloads', r'organize downloads'],
             'web_search': [r'search the web for (.+)', r'find out (.+)', r'who is (.+)', r'what is the latest (.+)'],
+            'timer': [r'set (a )?timer for (\d+) minutes', r'timer (\d+) minutes', r'remind me in (\d+) minutes'],
+            'news': [r'what is the news', r'give me (the )?news', r'headlines', r'what\'s happening'],
             'open_app': [r'open (.+)', r'launch (.+)', r'start (.+)'],
             'play_music': [r'play (.+)'],
             'search_google': [r'search for (.+)', r'google (.+)', r'search (.+) on google'],
