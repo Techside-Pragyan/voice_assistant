@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 import threading
+import time
+import math
+import random
 from speech.recognition import recognizer
 from speech.tts import tts
 from core.intent_engine import intent_engine
@@ -141,10 +144,6 @@ class VoiceAssistantGUI:
 
     def animate_pulse(self):
         # 1. Floating & Breathing Logic
-        import math
-        import time
-        import random
-        
         t = time.time()
         # Substantially bigger floating for 'Live' feel
         float_y = math.sin(t * 3) * 8
