@@ -415,14 +415,18 @@ class CommandHandler:
             webbrowser.open(f"https://www.google.com/search?q={query}")
 
     def _handle_app_search(self, params):
-        # params could be (app, action, query) or (action, query, app)
+        # params could be (app, action, query) or (action, query, app) or (app, query)
+        app, query = None, None
+        
         if len(params) == 3:
-            # Check which order we have
-            if any(app in params[0].lower() for app in ["youtube", "spotify", "google", "amazon", "chrome"]):
-                app, action, query = params[0], params[1], params[2]
+            if any(a in params[0].lower() for a in ["youtube", "spotify", "google", "amazon", "chrome"]):
+                app, query = params[0], params[2]
             else:
-                action, query, app = params[0], params[1], params[2]
-            
+                app, query = params[2], params[1]
+        elif len(params) == 2:
+            app, query = params[0], params[1]
+        
+        if app and query:
             app = app.lower()
             query = query.strip()
             
@@ -437,7 +441,6 @@ class CommandHandler:
             elif "google" in app or "chrome" in app:
                 self._chrome_search(query)
             else:
-                # Default to web search
                 tts.speak(f"Searching for {query} on {app}.")
                 webbrowser.open(f"https://www.google.com/search?q={query}+{app}")
 
