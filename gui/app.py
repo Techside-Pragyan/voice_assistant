@@ -57,9 +57,10 @@ class VoiceAssistantGUI:
         try:
             from PIL import Image, ImageTk
             import os
+            from config.settings import BASE_DIR
             # Paths
-            path_closed = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\3d_avatar_closed_mouth_1776787113809.png"
-            path_open = r"C:\Users\pragy\.gemini\antigravity\brain\dc4f1202-b66c-4ee0-aaa1-3a79ddd3634f\3d_avatar_open_mouth_1776787155269.png"
+            path_closed = os.path.join(BASE_DIR, "assets", "avatar_closed.png")
+            path_open = os.path.join(BASE_DIR, "assets", "avatar_open.png")
             
             self.frames = []
             for p in [path_closed, path_open]:
