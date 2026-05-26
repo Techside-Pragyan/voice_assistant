@@ -20,13 +20,13 @@ class SpeechRecognizer:
             print(f"Warning: No input device found: {e}")
             self.microphone_missing = True
 
-    def _record_audio(self, max_duration=7, silence_threshold=500, silence_limit=0.3, wait_for_speech=0.8):
+    def _record_audio(self, max_duration=10, silence_threshold=600, silence_limit=0.2, wait_for_speech=0.6):
         """
         Hyper-optimized audio recording. 
-        - Lower silence limit (0.35s) for instant cutoff after speaking.
-        - Lower wait_for_speech (1.2s) to stop listening faster if no speech.
+        - Lower silence limit (0.2s) for instant cutoff after speaking.
+        - Lower wait_for_speech (0.6s) to stop listening faster if no speech.
         """
-        chunk_size = 512 # Smaller chunks for finer control
+        chunk_size = 256 # Even smaller chunks for finer control
         audio_data = []
         
         try:

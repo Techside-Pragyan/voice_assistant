@@ -265,14 +265,16 @@ class VoiceAssistantGUI:
                 tts.speak("I'm listening! What can I do for you?")
                 return
 
-            # Check for multiple commands separated by "then" or "and finally"
+            # Advanced NLP Task Planner
             commands = []
-            if " then " in clean_query:
-                commands = [c.strip() for c in clean_query.split(" then ")]
-            elif " and finally " in clean_query:
-                commands = [c.strip() for c in clean_query.split(" and finally ")]
-            else:
-                commands = [clean_query if clean_query else query]
+            import re
+            
+            # Smart split by common task connectors
+            raw_tasks = re.split(r'\s+and then\s+|\s+and finally\s+|\s+then\s+|\s+and\s+', clean_query)
+            
+            for t in raw_tasks:
+                if t.strip():
+                    commands.append(t.strip())
 
             for cmd in commands:
                 self.update_transcript(f"Executing: {cmd}")

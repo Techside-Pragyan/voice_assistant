@@ -404,9 +404,9 @@ class CommandHandler:
             tts.speak(f"Window management failed: {e}")
 
     def _web_search(self, query):
-        from duckduckgo_search import DDGS
-        tts.speak(f"Let me check the latest on {query}...")
         try:
+            from ddgs import DDGS
+            tts.speak(f"Let me check the latest on {query}...")
             with DDGS() as ddgs:
                 results = [r for r in ddgs.text(query, max_results=3)]
                 if results:

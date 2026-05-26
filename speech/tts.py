@@ -49,8 +49,8 @@ class TTSManager:
                     self.engine.setProperty('voice', voice.id)
                     break
             
-            # Increased rate for faster response
-            self.engine.setProperty('rate', 240) # Slightly faster
+            # Extremely fast rate for instant responses
+            self.engine.setProperty('rate', 250)
             self.engine.setProperty('volume', VOICE_VOLUME)
         except Exception as e:
             print(f"Error setting up voice: {e}")
@@ -66,4 +66,3 @@ class TTSManager:
 
 # Singleton instance
 tts = TTSManager()
-

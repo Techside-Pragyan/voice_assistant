@@ -5,7 +5,7 @@ from utils.memory import memory
 class AIConsultant:
     def __init__(self):
         self.client = None
-        if OPENAI_API_KEY:
+        if OPENAI_API_KEY and "your_" not in OPENAI_API_KEY:
             self.client = openai.OpenAI(api_key=OPENAI_API_KEY)
         
         self.conversation_history = [
@@ -16,8 +16,21 @@ class AIConsultant:
         """
         Ultra-fast streaming response. Yields sentences as they are generated.
         """
-        if not OPENAI_API_KEY or "your_" in OPENAI_API_KEY:
-            yield "AI brain disconnected. Check .env."
+        # FREE FALLBACK AI if no OpenAI Key is present
+        if not self.client:
+            try:
+                from ddgs import DDGS
+                with DDGS() as ddgs:
+                    # Fallback to web search summary since free chat API is deprecated
+                    results = list(ddgs.text(question, max_results=1))
+                    if results:
+                        yield f"Here is what I found on the web: {results[0]['body']}"
+                    else:
+                        yield "I don't have an answer for that right now. Please add an OpenAI key for full conversational abilities."
+            except ImportError:
+                yield "DuckDuckGo search library is missing."
+            except Exception as e:
+                yield "I am operating without an AI brain. Please add your OpenAI key to the .env file."
             return
             
         try:
@@ -28,7 +41,7 @@ class AIConsultant:
                 self.conversation_history = [self.conversation_history[0]] + self.conversation_history[-4:]
 
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini", # Faster and smarter than 3.5
                 messages=self.conversation_history,
                 max_tokens=200,
                 stream=True # Enable streaming
@@ -43,8 +56,6 @@ class AIConsultant:
                     full_answer += content
                     current_sentence += content
                     
-                    # If we have a complete sentence or a significant pause (comma), yield it
-                    # This makes TTS start much faster for long sentences
                     if any(punct in content for punct in ['.', '!', '?', '\n', ',']):
                         if len(current_sentence.strip()) > 10 or '.' in content: 
                             yield current_sentence.strip()

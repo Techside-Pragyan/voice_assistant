@@ -8,3 +8,8 @@ psutil
 yfinance
 pyautogui
  Pillow
+
+edge-tts
+pygame
+thefuzz
+duckduckgo-search
